@@ -17,6 +17,7 @@ Every important quantity is classified as one of:
 - `MEASURED` / `MEASURED_DATASET`
 - `STANDARD`
 - `LITERATURE`
+- `LINK_LEVEL_SIMULATION`
 - `DERIVED`
 - `EXPERIMENTAL_SWEEP`
 - `EXPERIMENTAL_ASSUMPTION`
@@ -51,7 +52,7 @@ The same geometry/power accounting can use:
 - measurement-derived A2A fit;
 - 3GPP Case-9 UMi-AV LOS.
 
-The simulator computes desired received power, aggregate co-channel interference, SIR, SINR, threshold-based outage/link-success proxies and a Shannon theoretical upper bound.
+The simulator computes desired received power, aggregate co-channel interference, SIR and SINR. The legacy threshold-success and Shannon outputs remain available only as explicitly labelled preliminary proxies/reference bounds.
 
 ### 4. Density Monte Carlo study
 
@@ -75,6 +76,16 @@ NetworkX helpers support minimum-hop and link-quality-aware path selection on ex
 
 Directional gain is treated as an explicit experimental sweep. This isolates possible SINR improvement without pretending to implement a complete array/beam-management PHY.
 
+### 9. Standards-based MCS + sourced BLER layer
+
+`src/sidelink/nr_mcs.py` implements non-reserved NR MCS Table-1 indices `0..28` from **3GPP TS 38.214 V19.4.0 Table 5.1.3.1-1**. These are `STANDARD` values.
+
+`src/sidelink/link_performance.py` and `src/sidelink/bler_io.py` consume sourced SINR-to-BLER curves. The repository includes a small verified **5G-LENA EESM** fixture for Table-1, LDPC BG1, CBS4096 and MCS 4/5/6. These curves are `LINK_LEVEL_SIMULATION`, not measured UAV RF data and not 3GPP-standard BLER curves.
+
+`src/sidelink/link_adaptation.py` selects the available sourced MCS that maximizes expected PHY goodput. The selection rule is a system-level algorithm implemented in this work, not a normative 3GPP AMC requirement.
+
+The full upstream 5G-LENA Table-1 dataset can be extracted from a local official `nr-eesm-t1.cc` source file with `tools/extract_5glena_bler.py`; the complete GPL source is not vendored here.
+
 ## Main experiments
 
 ```bash
@@ -95,6 +106,9 @@ python -m simulations.routing_study
 
 # Beamforming-gain sensitivity
 python -m simulations.beamforming_sensitivity
+
+# 3GPP-MCS + sourced-BLER link performance study
+python -m simulations.nr_link_performance_study
 ```
 
 For a real AMOVFLY pair, see `docs/experiments/004_real_mobility_amovfly.md`.
@@ -105,10 +119,10 @@ Install dependencies and run:
 
 ```bash
 pip install -r requirements.txt
-pytest -q
+python -m pytest -q
 ```
 
-GitHub Actions also runs the unit tests and baseline smoke checks. See `docs/experiments/006_validation_status.md` for the exact implemented boundary.
+GitHub Actions also runs the unit tests and all baseline smoke checks.
 
 ## Repository structure
 
@@ -117,10 +131,12 @@ uav-sidelink-swarm/
 ├── .github/workflows/
 ├── config/
 ├── data/
+│   └── reference/
 ├── docs/experiments/
 ├── figures/
 ├── references/
 │   ├── parameter_sources.md
+│   ├── link_performance_sources.md
 │   └── references.bib
 ├── results/
 ├── simulations/
@@ -130,6 +146,7 @@ uav-sidelink-swarm/
 │   ├── mobility/
 │   ├── networking/
 │   └── sidelink/
+├── tools/
 └── tests/
 ```
 
@@ -138,21 +155,23 @@ uav-sidelink-swarm/
 The current repository does **not** claim to implement:
 
 - a bit-accurate NR Sidelink PHY;
-- actual NR MCS/LDPC/BLER curves;
-- HARQ procedures;
+- the complete 5G-LENA SINR-BLER dataset for all MCS/CBS/base-graph combinations inside the repository;
+- validated NR HARQ Chase Combining / Incremental Redundancy timing and combining;
 - a normative Mode-1/Mode-2 scheduler;
 - full 3GPP fast fading;
 - full MIMO/beam management;
 - measured multi-UAV RF interference or measured PDR.
 
-Until an MCS/BLER link model is sourced and validated, `link_success_proxy` remains an SINR-threshold proxy. `B*log2(1+SINR)` remains a Shannon theoretical upper bound, not NR user throughput.
+Where a sourced BLER curve is available, first-transmission reliability is now derived as `1 - BLER(SINR)` instead of using the old fixed SINR threshold. `B*log2(1+SINR)` remains only a Shannon theoretical upper bound. The new BLER-based goodput remains a derived PHY metric rather than measured end-to-end throughput.
 
 ## Core references
 
 - A. Giannakoulas et al., **“Sidelink Communication for Unmanned Platforms' (UxU) Swarms in Challenging Scenarios,”** CIEES 2025, DOI `10.1109/CIEES66347.2025.11300255`.
 - U. Erdemir et al., IEEE VTC 2023-Spring, DOI `10.1109/VTC2023-Spring57618.2023.10199853`.
+- N. Patriciello et al., **“An E2E simulator for 5G NR networks,”** SIMPAT 96 (2019), DOI `10.1016/j.simpat.2019.101933`.
+- 5G-LENA v5.0 software archive, DOI `10.5281/zenodo.21165297`.
 - 3GPP TR 38.901 V19.4.0, Release 19.
 - 3GPP TR 36.777, aerial-vehicle channel-model annexes.
 - 3GPP TS 38.214 / TS 38.213 V19.4.0 for NR physical-layer procedure background.
 
-Detailed parameter provenance is maintained in `references/parameter_sources.md`.
+Detailed provenance is maintained in `references/parameter_sources.md` and `references/link_performance_sources.md`.
