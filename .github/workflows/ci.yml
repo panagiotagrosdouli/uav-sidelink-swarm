@@ -33,6 +33,8 @@ jobs:
         run: python -m simulations.routing_study --smoke
       - name: Smoke-test directionality sensitivity
         run: python -m simulations.beamforming_sensitivity --smoke
+      - name: Smoke-test ULA directionality
+        run: python -m simulations.ula_directionality_study --smoke
       - name: Smoke-test robustness sensitivity
         run: python -m simulations.robustness_sensitivity --smoke
       - name: Smoke-test NR MCS/BLER link performance
@@ -41,8 +43,20 @@ jobs:
         run: python -m simulations.harq_tbs_latency_study
       - name: Smoke-test sidelink overhead sensitivity
         run: python -m simulations.sidelink_overhead_sensitivity
+      - name: Smoke-test traffic load
+        run: python -m simulations.traffic_load_study --smoke
+      - name: Smoke-test failure analysis
+        run: python -m simulations.failure_analysis --smoke
+      - name: Smoke-test spatial diagnostics
+        run: python -m simulations.spatial_diagnostics --smoke
+      - name: Smoke-test synthetic mobility
+        run: python -m simulations.synthetic_mobility_study --smoke
+      - name: Smoke-test ablation
+        run: python -m simulations.ablation_study --smoke
       - name: Validate reproducible thesis registry
         run: python -m tools.run_thesis_pipeline --dry-run --smoke
+      - name: Validate final campaign config/finalizer syntax
+        run: python -m py_compile tools/finalize_campaign.py tools/prepare_5glena_v5_bler.py src/sidelink/adaptive_tb.py
       - name: Upload scientific outputs
         uses: actions/upload-artifact@v4
         with:

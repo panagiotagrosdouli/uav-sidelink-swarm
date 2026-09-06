@@ -1,0 +1,64 @@
+campaign:
+  name: final_uav_nr_sidelink_experimental_campaign
+  classification: MIXED_PROVENANCE_RESEARCH_CAMPAIGN
+  seeds: 100
+  swarm_sizes: [5, 10, 20, 30, 50, 75, 100]
+
+baseline:
+  channel: measured_a2a
+  carrier_ghz: 3.5          # LITERATURE/measurement campaign metadata: Erdemir et al. 2023
+  bandwidth_mhz: 50.0       # LITERATURE/measurement campaign metadata: Erdemir et al. 2023
+  tx_power_dbm: 30.0        # LITERATURE campaign value; NOT universal UAV sidelink power
+  altitude_m: 100.0         # LITERATURE A2A campaign value
+  area_xy_m: 1000.0         # SYNTHETIC baseline area
+  noise_figure_db: 7.0      # EXPERIMENTAL_ASSUMPTION
+  geometry: uniform          # SYNTHETIC
+
+nr_resource_profile:
+  scs_khz: 30               # STANDARD-constrained NR numerology
+  n_prb: 133                # STANDARD: 50 MHz / 30 kHz FR1 profile
+  n_slot_symbols: 14
+  n_pscch_symbols: 2        # EXPERIMENTAL_CONFIGURATION
+  n_guard_symbols: 1        # EXPERIMENTAL_CONFIGURATION
+  n_pssch_symbols: 11       # EXPERIMENTAL_CONFIGURATION
+  dmrs_re_per_prb: 24       # EXPERIMENTAL_CONFIGURATION
+
+sweeps:
+  activity_probability: [0.10, 0.25, 0.50, 0.75, 1.00]   # EXPERIMENTAL_SWEEP
+  abstract_resources: [1, 2, 4, 8]                       # EXPERIMENTAL_SWEEP
+  directional_gain_db: [0, 3, 6, 9]                     # EXPERIMENTAL_SWEEP
+  harq_max_attempts: [1, 2, 4]                           # EXPERIMENTAL_SWEEP
+  harq_feedback_gap_slots: [1, 2, 4, 8]                 # EXPERIMENTAL_SWEEP
+  noise_figure_db: [3, 5, 7, 9, 12]                     # EXPERIMENTAL_SWEEP
+  tx_power_dbm: [10, 20, 23, 30]                        # EXPERIMENTAL_SWEEP
+  area_xy_m: [500, 1000, 1500, 2000]                    # SYNTHETIC/EXPERIMENTAL_SWEEP
+  tr38901_altitude_m: [30, 50, 100, 150, 250]           # within implemented valid 3GPP branch
+
+traffic:
+  packet_size_bytes: 256                    # EXPERIMENTAL_CONFIGURATION
+  arrival_rates_pps_per_link: [50, 500, 1500]  # EXPERIMENTAL_SWEEP
+
+bler:
+  bundled_fixture: data/reference/5glena_table1_bg1_cbs4096_subset.csv
+  bundled_fixture_scope: "5G-LENA Table1 BG1 CBS4096 MCS4/5/6 subset"
+  bundled_fixture_classification: LINK_LEVEL_SIMULATION
+  preferred_full_external_dataset: data/generated/5glena_v5_table1_bler.csv
+  official_release: v5.0
+  official_release_commit_short: 47a3adc2
+  official_release_doi: 10.5281/zenodo.21165297
+
+external_data:
+  amovfly:
+    required_for_real_mobility_canonical_figure: true
+    vendored: false
+    classification: MEASURED_DATASET
+    note: "Raw AMOVFLY CSVs are external and are not redistributed because repository licensing was not verified."
+
+non_claims:
+  - bit_accurate_nr_sidelink_phy
+  - normative_mode2_scheduler
+  - exact_harq_incremental_redundancy_history
+  - full_fast_fading
+  - full_mimo_beam_management
+  - measured_swarm_rf_pdr
+  - measured_end_to_end_latency
