@@ -42,3 +42,10 @@ link_success:
   sinr_threshold_db: 5.0
   classification: EXPERIMENTAL_ASSUMPTION
   note: "Preliminary success proxy only; not NR BLER/PDR."
+
+extensions:
+  resource_counts: [1, 2, 4, 8]
+  resource_counts_classification: EXPERIMENTAL_SWEEP
+  beamforming_gain_db: [0, 3, 6, 9]
+  beamforming_gain_classification: EXPERIMENTAL_SWEEP
+  note: "Extension values are controlled research sweeps, not measured hardware parameters."
