@@ -58,6 +58,7 @@ def select_tbs_aware_mcs(
             continue
         success = estimate.first_tx_success_probability
         goodput = (tbs * success / grid.slot_duration_ms) / 1000.0
+        source_curve = curves[(mcs, estimate.base_graph, estimate.curve_cbs_bits)]
         choices.append(TbLinkChoice(
             mcs_index=mcs,
             tbs_bits=tbs,
@@ -67,6 +68,6 @@ def select_tbs_aware_mcs(
             tb_bler=estimate.transport_block_bler,
             success_probability=success,
             expected_goodput_mbps=goodput,
-            curve_source=estimate.curve.source,
+            curve_source=source_curve.source,
         ))
     return max(choices, key=lambda x: (x.expected_goodput_mbps, -x.mcs_index)) if choices else None
