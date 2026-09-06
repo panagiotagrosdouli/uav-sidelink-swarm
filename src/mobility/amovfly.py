@@ -31,7 +31,6 @@ def _clean_frame(df):
 
 def load_ready_csv(path, uav_name=None, prefer_global=True):
     path=Path(path); df=_clean_frame(pd.read_csv(path)); name=uav_name or path.stem
-    # Support both historical aliases and the column names in the public repository.
     lon_col = "gps_lon" if "gps_lon" in df else ("real_long" if "real_long" in df else None)
     lat_col = "gps_lat" if "gps_lat" in df else ("real_lat" if "real_lat" in df else None)
     alt_col = "altitude" if "altitude" in df else None
@@ -69,7 +68,6 @@ def trajectory_to_common_enu(trajectory,origin):
     df=trajectory.data; alt=df.altitude_m.to_numpy(float) if "altitude_m" in df else np.zeros(len(df))
     enu=ecef_to_enu(geodetic_to_ecef(df.lon_deg,df.lat_deg,alt),*origin)
     out=pd.DataFrame({"time_s":df.time_s.to_numpy(float),"x_m":enu[:,0],"y_m":enu[:,1],"z_m":enu[:,2]})
-    # 2D source has no trustworthy common vertical coordinate: force z=0 and label it.
     if trajectory.coordinate_frame=="WGS84_GEODETIC_2D": out["z_m"]=0.0
     frame="COMMON_ENU_WGS84_3D" if trajectory.coordinate_frame!="WGS84_GEODETIC_2D" else "COMMON_ENU_WGS84_HORIZONTAL_ONLY"
     return Trajectory(trajectory.uav_name,out,classification="DERIVED_FROM_MEASURED_DATASET",coordinate_frame=frame)
@@ -87,7 +85,8 @@ def synchronize_pair(first,first_takeoff,second,second_takeoff,sample_period_s=0
     req={"time_s","x_m","y_m","z_m"}
     if not req.issubset(first.data) or not req.issubset(second.data): raise ValueError("synchronize_pair requires Cartesian trajectories")
     if first.coordinate_frame!=second.coordinate_frame: raise ValueError("trajectory coordinate frames do not match")
-    if first.coordinate_frame=="LOCAL_UNKNOWN_ORIGIN": raise ValueError("unsafe local origins")
+    if first.coordinate_frame=="LOCAL_UNKNOWN_ORIGIN":
+        raise ValueError("LOCAL_UNKNOWN_ORIGIN is unsafe for cross-UAV distance; transform geodetic telemetry to a shared frame")
     a=first.data.copy(); b=second.data.copy(); a["absolute_s"]=first_takeoff.timestamp()+a.time_s; b["absolute_s"]=second_takeoff.timestamp()+b.time_s
     start=max(a.absolute_s.min(),b.absolute_s.min()); end=min(a.absolute_s.max(),b.absolute_s.max())
     if end<=start: raise ValueError("trajectories do not overlap in time")
