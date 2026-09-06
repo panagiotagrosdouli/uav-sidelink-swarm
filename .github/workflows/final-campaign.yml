@@ -1,0 +1,35 @@
+name: final-thesis-campaign
+
+on:
+  workflow_dispatch:
+
+jobs:
+  campaign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONPATH: .
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run unit tests before full campaign
+        run: python -m pytest -q
+      - name: Run full registered thesis campaign
+        run: python -m tools.run_thesis_pipeline
+      - name: Finalize and scientifically audit campaign
+        run: python -m tools.finalize_campaign
+      - name: Upload canonical campaign evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-thesis-campaign-${{ github.sha }}
+          path: |
+            results/final_campaign/
+            figures/final_campaign/
+            results/reproducibility/
+          if-no-files-found: error
+          retention-days: 90
