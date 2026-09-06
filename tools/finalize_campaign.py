@@ -14,15 +14,15 @@ def _git_sha():
 def _copy(src,dst):
     if not src.exists():return False
     dst.parent.mkdir(parents=True,exist_ok=True); shutil.copy2(src,dst); return True
-def _is_count(c):
+def _is_count_column(c):
     n=c.lower(); return n in COUNT_NAMES or n.endswith(("_n","_count","_counts","_samples","_seeds"))
-def _audit(name,df):
+def _audit_dataframe(name,df):
     checks=[]
     for c in df.columns:
         num=pd.to_numeric(df[c],errors="coerce")
         if not num.notna().sum():continue
         v=num.dropna().to_numpy(float); status="pass"; note=""; low=c.lower()
-        if _is_count(c):
+        if _is_count_column(c):
             if np.any(v < -1e-12):status,note="fail","negative sample/count value"
             elif np.any(np.abs(v-np.rint(v))>1e-9):status,note="fail","non-integer sample/count value"
         else:
@@ -31,6 +31,10 @@ def _audit(name,df):
             if "tbs" in low and "bits" in low and np.any(v<=0):status,note="fail","non-positive TBS"
         checks.append({"dataset":name,"column":c,"status":status,"note":note})
     return checks
+# Backward-compatible private aliases used by earlier internal scripts.
+_is_count=_is_count_column
+_audit=_audit_dataframe
+
 def _parameter_provenance(cfg):
     b=cfg["baseline"]; r=cfg["nr_resource_profile"]
     return pd.DataFrame([["carrier frequency",b["carrier_ghz"],"GHz","LITERATURE","Erdemir et al. VTC 2023 A2A campaign"],["bandwidth",b["bandwidth_mhz"],"MHz","LITERATURE","Erdemir et al. VTC 2023 A2A campaign"],["baseline TX power",b["tx_power_dbm"],"dBm","LITERATURE","Erdemir campaign value; not universal UAV power"],["baseline altitude",b["altitude_m"],"m","LITERATURE","Erdemir A2A campaign"],["baseline area side",b["area_xy_m"],"m","SYNTHETIC","final campaign configuration"],["receiver noise figure",b["noise_figure_db"],"dB","EXPERIMENTAL_ASSUMPTION","sensitivity-tested"],["PRBs",r["n_prb"],"PRB","STANDARD","50 MHz / 30 kHz FR1 profile"],["SCS",r["scs_khz"],"kHz","STANDARD","NR numerology"],["PSCCH symbols",r["n_pscch_symbols"],"symbols","EXPERIMENTAL_CONFIGURATION","thesis study profile"],["PSSCH symbols",r["n_pssch_symbols"],"symbols","EXPERIMENTAL_CONFIGURATION","thesis study profile"],["DM-RS overhead",r["dmrs_re_per_prb"],"RE/PRB","EXPERIMENTAL_CONFIGURATION","thesis study profile"]],columns=["parameter","value","unit","classification","source_or_note"])
@@ -59,7 +63,7 @@ def main():
     cfgp=Path("config/final_campaign.yaml"); cfg=yaml.safe_load(cfgp.read_text()); RESULT_OUT.mkdir(parents=True,exist_ok=True); FIG_OUT.mkdir(parents=True,exist_ok=True); shutil.copy2(cfgp,RESULT_OUT/"final_campaign.yaml"); ds={}; missing=[]; audit=[]
     for name,p in SUMMARY_SOURCES.items():
         src=Path(p)
-        if src.exists(): df=pd.read_csv(src); ds[name]=df; df.to_csv(RESULT_OUT/f"{name}_summary.csv",index=False); audit.extend(_audit(name,df))
+        if src.exists(): df=pd.read_csv(src); ds[name]=df; df.to_csv(RESULT_OUT/f"{name}_summary.csv",index=False); audit.extend(_audit_dataframe(name,df))
         else:missing.append(f"Missing summary `{src}`")
     figs=[]
     for stem,p in FIGURE_MAP.items():
