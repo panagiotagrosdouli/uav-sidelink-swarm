@@ -2,6 +2,17 @@ name: final-thesis-campaign
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/final-campaign.yml'
+      - 'config/final_campaign.yaml'
+      - 'tools/run_thesis_pipeline.py'
+      - 'tools/finalize_campaign.py'
+      - 'simulations/**'
+      - 'src/**'
+      - 'data/reference/**'
+      - 'requirements.txt'
 
 jobs:
   campaign:
