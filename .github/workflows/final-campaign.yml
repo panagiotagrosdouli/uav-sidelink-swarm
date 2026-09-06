@@ -32,6 +32,16 @@ jobs:
         run: python -m pytest -q
       - name: Run full registered thesis campaign
         run: python -m tools.run_thesis_pipeline
+      - name: Download verified simultaneous AMOVFLY public pair
+        run: |
+          mkdir -p data/external/amovfly
+          curl -fL 'https://raw.githubusercontent.com/YujiaoHu/AMOVFLY-Dataset/main/FAFS/FAFS/UavY_P0A10S6_1.csv' -o data/external/amovfly/UavY_P0A10S6_1.csv
+          curl -fL 'https://raw.githubusercontent.com/YujiaoHu/AMOVFLY-Dataset/main/FAVS/FAVS/UavR_P0A40VarS8_1.csv' -o data/external/amovfly/UavR_P0A40VarS8_1.csv
+      - name: Run canonical measured-mobility pair analysis
+        run: |
+          python -m simulations.real_mobility_pair \
+            --uav1-file data/external/amovfly/UavY_P0A10S6_1.csv --uav1-time '2024/11/21 13:50' \
+            --uav2-file data/external/amovfly/UavR_P0A40VarS8_1.csv --uav2-time '2024/11/21 13:46'
       - name: Finalize and scientifically audit campaign
         run: python -m tools.finalize_campaign
       - name: Upload canonical campaign evidence
@@ -42,5 +52,7 @@ jobs:
             results/final_campaign/
             figures/final_campaign/
             results/reproducibility/
+            results/real_mobility_pair/
+            figures/mobility/
           if-no-files-found: error
           retention-days: 90

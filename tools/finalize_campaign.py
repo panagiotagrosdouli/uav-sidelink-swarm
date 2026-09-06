@@ -32,7 +32,7 @@ FIGURE_MAP = {
     "fig08_routing": "figures/routing/direct_vs_multihop_reliability.pdf",
     "fig09_beamforming": "figures/beamforming/goodput_vs_directionality.pdf",
     "fig10_harq": "figures/harq_tbs_latency/success_vs_density.pdf",
-    "fig11_real_mobility": "figures/mobility/real_pair_sinr_vs_time.pdf",
+    "fig11_real_mobility": "figures/mobility/real_pair_distance_vs_time.pdf",
     "fig12_ablation": "figures/ablation/goodput_ablation.pdf",
     "fig13_scaling": "figures/scaling_geometry_activity/fixed_area_vs_fixed_density.pdf",
     "fig14_activity": "figures/scaling_geometry_activity/activity_factor_sinr.pdf",
@@ -56,6 +56,7 @@ SUMMARY_SOURCES = {
     "ablation": "results/ablation/summary.csv",
     "failure": "results/failure_analysis/summary.csv",
     "ula": "results/ula_directionality/summary.csv",
+    "real_mobility": "results/real_mobility_pair/summary.csv",
 }
 
 PROBABILITY_TOKENS = (
@@ -194,6 +195,17 @@ def _write_key_findings(datasets: dict[str, pd.DataFrame], missing: list[str]) -
                 f"- **Resource allocation at N={max_n}**: highest mean derived PHY goodput in the evaluated grid occurs for "
                 f"`{best.algorithm}` with {int(best.n_resources)} resources ({best.mean_expected_phy_goodput_mbps:.3f} Mbps).\n"
             )
+    mobility = datasets.get("real_mobility")
+    if mobility is not None and len(mobility):
+        row = mobility.iloc[0]
+        needed = {"samples", "overlap_duration_s", "horizontal_separation_min_m", "horizontal_separation_mean_m", "horizontal_separation_max_m"}
+        if needed.issubset(mobility.columns):
+            lines.append(
+                f"- **AMOVFLY simultaneous pair**: {int(row.samples)} synchronized measured-telemetry samples over "
+                f"{row.overlap_duration_s:.1f} s give a derived horizontal separation range "
+                f"{row.horizontal_separation_min_m:.2f}–{row.horizontal_separation_max_m:.2f} m "
+                f"(mean {row.horizontal_separation_mean_m:.2f} m). This is mobility evidence, not measured RF performance.\n"
+            )
     if missing:
         lines.append("\n## External/missing evidence\n")
         lines.extend(f"- {item}\n" for item in missing)
@@ -229,11 +241,15 @@ def main() -> int:
             _copy_if_exists(png_source, FIG_OUT / f"{stem}.png")
         figure_status.append({"figure": stem, "source": source_str, "present": copied})
         if stem == "fig11_real_mobility" and not copied:
-            missing.append("Real AMOVFLY canonical figure is unavailable because raw external telemetry is not vendored; run real_mobility_pair with user-supplied AMOVFLY files.")
+            missing.append("Real AMOVFLY canonical figure is unavailable; run the verified public-pair mobility step before finalization.")
 
     bler_manifest = Path("data/generated/5glena_v5_table1_bler_manifest.json")
     if bler_manifest.exists():
         shutil.copy2(bler_manifest, RESULT_OUT / "5glena_v5_table1_bler_manifest.json")
+
+    mobility_provenance = Path("results/real_mobility_pair/provenance.csv")
+    if mobility_provenance.exists():
+        shutil.copy2(mobility_provenance, RESULT_OUT / "real_mobility_provenance.csv")
 
     _parameter_provenance(config).to_csv(RESULT_OUT / "parameter_provenance.csv", index=False)
     _scenario_definitions(config).to_csv(RESULT_OUT / "scenario_definitions.csv", index=False)
