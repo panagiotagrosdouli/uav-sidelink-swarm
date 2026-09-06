@@ -1,0 +1,64 @@
+name: paper-operating-envelope
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "simulations/paper_operating_envelope.py"
+      - "src/sidelink/**"
+      - "src/swarm_system.py"
+      - "src/channel_models/**"
+      - "paper/**"
+      - ".github/workflows/paper-operating-envelope.yml"
+
+jobs:
+  paper-campaign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run unit tests
+        run: python -m pytest -q
+      - name: Run paper smoke validation
+        run: python -m simulations.paper_operating_envelope --smoke
+      - name: Run full 100-seed paper operating-envelope campaign
+        run: python -m simulations.paper_operating_envelope --seeds 100
+      - name: Record publication evidence SHA
+        run: |
+          printf '%s\n' "${GITHUB_SHA}" > results/paper_operating_envelope/git_sha.txt
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          out = Path('results/paper_operating_envelope')
+          payload = {
+              'git_sha': '${{ github.sha }}',
+              'workflow': 'paper-operating-envelope',
+              'seeds': 100,
+              'classification': 'DERIVED_SYSTEM_LEVEL_EXPERIMENTAL_CAMPAIGN',
+              'non_claims': [
+                  'not measured swarm RF',
+                  'not normative NR sidelink Mode 1/2 scheduling',
+                  'not full MIMO/beam management',
+                  'not a universal maximum swarm-size result'
+              ]
+          }
+          (out / 'manifest.json').write_text(json.dumps(payload, indent=2) + '\n')
+          PY
+      - name: Upload publication evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-operating-envelope-${{ github.sha }}
+          path: |
+            results/paper_operating_envelope/
+            figures/paper_operating_envelope/
+            paper/README.md
+          if-no-files-found: error
+          retention-days: 90
