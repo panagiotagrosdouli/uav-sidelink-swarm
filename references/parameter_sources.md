@@ -1,44 +1,56 @@
 # Parameter provenance
 
-This project distinguishes **measured published values**, **standards-based values**, and **synthetic experiment variables**. A value must not be described as a real measurement unless it was obtained from a published measurement campaign or a dataset containing measured samples.
+This project distinguishes **MEASURED**, **STANDARD**, **LITERATURE**, **DERIVED**, **EXPERIMENTAL_SWEEP**, and **SYNTHETIC** quantities. A value must not be described as a real measurement unless it was obtained directly from a published measurement campaign or measured dataset.
 
 ## Measurement-based A2A baseline at 3.5 GHz
 
-Primary source: U. Erdemir, B. Kaplan, I. Hokelek, A. Gorcin, H. A. Cirpan, *Measurement-based Channel Characterization for A2A and A2G Wireless Drone Communication Systems*, 2023, arXiv:2306.08474.
+Primary peer-reviewed source:
 
-| Parameter | Value | Classification | Source location |
-|---|---:|---|---|
-| Center frequency | 3.5 GHz | Measured campaign configuration | Measurement System / Table I |
-| Bandwidth | 50 MHz | Measured campaign configuration | Measurement System / Table I |
-| Transmitted power | 30 dBm | Measured campaign configuration | Measurement System / Table I |
-| UAV platform | DJI Matrice 600 Pro | Measured campaign hardware | Measurement Environment |
-| TX altitude | 100 m | Measured campaign geometry | Measurement Environment |
-| RX altitude | 100 m | Measured campaign geometry | Measurement Environment |
-| Initial A2A distance | 85 m | Measured campaign geometry | Measurement Environment |
-| TX flight speed | 3 m/s | Measured campaign geometry | Measurement Environment |
-| TX trajectory | 1 km straight route | Measured campaign geometry | Measurement Environment |
-| Measurement interval | 100 ms | Measured campaign procedure | Measurement Environment |
-| PN length | 4095 | Measured campaign waveform | Table I |
-| Delay resolution | 20 ns | Measured campaign waveform | Table I |
-| Maximum delay | 160 us | Measured campaign waveform | Table I |
-| A2A path-loss exponent n | 2.166 | Measurement-derived fit | Measurement Results |
-| A2A PL0 | 34.650 dB | Measurement-derived fit | Measurement Results |
-| Reference distance | 1 m | Measurement-model definition | Measurement Results |
+U. Erdemir, B. Kaplan, I. Hokelek, A. Gorcin, H. A. Cirpan, *Measurement-based Channel Characterization for A2A and A2G Wireless Drone Communication Systems*, 2023 IEEE 97th Vehicular Technology Conference (VTC2023-Spring), DOI: **10.1109/VTC2023-Spring57618.2023.10199853**.
 
-The A2A path-loss model used for the reproduction is:
+Open manuscript: arXiv:2306.08474.
+
+| Parameter | Value | Unit | Type | Source location | Notes |
+|---|---:|---|---|---|---|
+| Center frequency | 3.5 | GHz | MEASURED campaign configuration | Sec. III-A / Table I | Channel sounder configuration |
+| Bandwidth | 50 | MHz | MEASURED campaign configuration | Sec. III-A / Table I | Channel sounder configuration |
+| Transmitted power | 30 | dBm | MEASURED campaign configuration | Sec. III-A / Table I | RF signal amplified to 30 dBm before antenna |
+| UAV platform | DJI Matrice 600 Pro | - | MEASURED campaign hardware | Sec. III-B | Two drones used |
+| TX altitude | 100 | m | MEASURED campaign geometry | Sec. III-B | A2A scenario |
+| RX altitude | 100 | m | MEASURED campaign geometry | Sec. III-B | A2A scenario |
+| Initial A2A distance | 85 | m | MEASURED campaign geometry | Sec. III-B | Initial TX/RX separation |
+| TX flight speed | 3 | m/s | MEASURED campaign geometry | Sec. III-B | Constant speed |
+| TX trajectory | 1000 | m | MEASURED campaign geometry | Sec. III-B | Straight trajectory |
+| Measurement interval | 100 | ms | MEASURED campaign procedure | Sec. III-A/III-B | Samples/records saved periodically |
+| PN length | 4095 | samples | MEASURED campaign waveform | Sec. III-A / Table I | Channel sounding sequence |
+| A2A path-loss exponent, eta | 2.166 | - | DERIVED from measurements | Table II / measurement results | Fitted large-scale A2A path-loss parameter |
+| A2A PL0 | 34.650 | dB | DERIVED from measurements | Table II / measurement results | Fitted intercept reported for A2A |
+| Reference distance d0 | 1 | m | LITERATURE model definition | Eq. (3) / implementation convention | Used by the reproduced log-distance model |
+
+The large-scale A2A fit reproduced in this repository is:
 
 `PL(d) = 34.650 + 10 * 2.166 * log10(d / 1 m)`
 
+Important: the fit is **measurement-derived**, but values produced by evaluating this equation at new distances are **DERIVED simulation/model outputs**, not raw measured samples.
+
 ## Values intentionally NOT called measured
 
-The following are not available as measured values from the cited A2A campaign and must remain clearly labelled if used later:
+The following are not measurements from the Erdemir et al. campaign:
 
-- swarm size (e.g. 5, 10, 20, 50 UAVs)
-- traffic activity probability
-- receiver noise figure unless sourced from the exact receiver hardware
-- arbitrary SINR decoding threshold
-- scheduler/resource-pool configuration
-- interferer placement in a many-UAV swarm
-- packet delivery ratio unless derived from a PHY/MAC model or measured packets
+- swarm size (e.g. 5, 10, 20, 30, 50 UAVs) — `EXPERIMENTAL_SWEEP`;
+- random UAV placement — `SYNTHETIC`;
+- traffic activity probability — `EXPERIMENTAL_SWEEP` or `SYNTHETIC`, depending on use;
+- receiver noise figure unless traced to exact hardware — currently an assumption;
+- arbitrary SINR decoding threshold — currently an assumption/proxy;
+- scheduler/resource-pool configuration — must come from 3GPP or be labelled experimental;
+- many-UAV interferer placement — synthetic unless a measured swarm dataset is used;
+- packet delivery ratio from an SINR threshold — simulation proxy, never measured PDR;
+- Shannon `B log2(1+SINR)` — theoretical upper bound, not NR throughput.
 
-These quantities may be introduced later as experimental variables, standards-based parameters, or values from additional published measurements, but not as measurements from the Erdemir et al. campaign.
+## Source verification status
+
+- Peer-reviewed DOI: VERIFIED.
+- Measurement geometry/configuration above: VERIFIED against the open manuscript.
+- A2A fitted `eta=2.166` and `PL0=34.650 dB`: VERIFIED from Table II / reported fit results.
+- Exact raw measurement samples: NOT present in this repository.
+- Full 3GPP aerial channel implementation: NOT YET IMPLEMENTED.
