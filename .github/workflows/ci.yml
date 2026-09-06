@@ -35,3 +35,5 @@ jobs:
         run: python -m simulations.nr_link_performance_study
       - name: Smoke-test TBS/CBS/HARQ latency study
         run: python -m simulations.harq_tbs_latency_study
+      - name: Smoke-test sidelink overhead sensitivity
+        run: python -m simulations.sidelink_overhead_sensitivity
