@@ -37,6 +37,8 @@ jobs:
         run: python -m simulations.harq_tbs_latency_study
       - name: Smoke-test sidelink overhead sensitivity
         run: python -m simulations.sidelink_overhead_sensitivity
+      - name: Smoke-test canonical multi-dimensional campaign
+        run: python -m simulations.final_experimental_campaign --smoke
       - name: Validate reproducible thesis registry
         run: python -m tools.run_thesis_pipeline --dry-run
       - name: Upload scientific outputs
