@@ -1,0 +1,8 @@
+{
+  "canonical_git_sha": "c293502a7410edf0c5c4cc982da9b449093b832b",
+  "workflow_run_id": 34029037140,
+  "scientific_audit_rows": 295,
+  "scientific_audit_failures": 0,
+  "status": "pass",
+  "note": "The complete scientific_audit.csv is retained in the canonical GitHub Actions artifact."
+}
