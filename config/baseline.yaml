@@ -1,0 +1,30 @@
+scenario:
+  name: baseline_uav_sidelink
+  seed: 42
+  num_uavs: 10
+  area_m: [500, 500]
+  altitude_m: 100
+  # Synthetic geometry for the initial baseline. Do not treat as measured data.
+
+radio:
+  carrier_frequency_ghz: 3.5
+  bandwidth_mhz: 20
+  tx_power_dbm: 23
+  tx_gain_dbi: 0
+  rx_gain_dbi: 0
+  receiver_noise_figure_db: 7
+
+channel:
+  model: free_space_baseline
+  # Baseline only. Next milestone: aerial-UE to aerial-UE model aligned with
+  # 3GPP TR 38.901 / referenced UAV models.
+
+link:
+  sinr_threshold_db: 5
+
+provenance:
+  standards:
+    - "3GPP TR 38.901: Study on channel model for frequencies from 0.5 to 100 GHz"
+  notes:
+    - "Carrier/bandwidth/power/noise values are baseline assumptions, not measured UAV RF data."
+    - "Every assumption will be replaced or sensitivity-tested against cited literature before thesis use."
