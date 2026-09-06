@@ -1,42 +1,27 @@
-"""Sweep swarm size and export SINR/PDR summary statistics."""
-from pathlib import Path
+"""DEPRECATED legacy density sweep.
 
-import pandas as pd
+This historical script used `src.sinr_sim.Config` with a 5.9 GHz / 20 MHz FSPL
+baseline and a ring-link abstraction. It is intentionally excluded from the
+scientific thesis pipeline because the current canonical studies use
+`src.swarm_system` with explicit provenance and the 3.5 GHz measurement-derived
+baseline. Run `python -m simulations.density_measurement_based` or
+`python -m simulations.scaling_geometry_activity_study` instead.
+"""
+from __future__ import annotations
 
-from src.sinr_sim import Config, simulate
+import warnings
 
 
 def main() -> None:
-    rows = []
-    for n in [5, 10, 20, 30, 50]:
-        for seed in range(20):
-            cfg = Config(n_uavs=n, seed=seed, activity_probability=0.35)
-            _, links = simulate(cfg)
-            if links.empty:
-                continue
-            rows.append({
-                "n_uavs": n,
-                "seed": seed,
-                "active_links": len(links),
-                "mean_sinr_db": links.sinr_db.mean(),
-                "median_sinr_db": links.sinr_db.median(),
-                "pdr_proxy": links.success.mean(),
-                "mean_shannon_upper_bound_mbps": links.shannon_upper_bound_mbps.mean(),
-            })
-
-    out = Path("results/density_sweep")
-    out.mkdir(parents=True, exist_ok=True)
-    df = pd.DataFrame(rows)
-    df.to_csv(out / "per_seed.csv", index=False)
-    summary = df.groupby("n_uavs").agg(
-        mean_sinr_db=("mean_sinr_db", "mean"),
-        std_sinr_db=("mean_sinr_db", "std"),
-        mean_pdr_proxy=("pdr_proxy", "mean"),
-        std_pdr_proxy=("pdr_proxy", "std"),
-        mean_shannon_upper_bound_mbps=("mean_shannon_upper_bound_mbps", "mean"),
-    ).reset_index()
-    summary.to_csv(out / "summary.csv", index=False)
-    print(summary.to_string(index=False))
+    warnings.warn(
+        "simulations.run_density_sweep is deprecated; use density_measurement_based or scaling_geometry_activity_study",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    raise SystemExit(
+        "Deprecated scientific baseline: this script used conflicting 5.9 GHz/20 MHz assumptions. "
+        "Use `python -m simulations.density_measurement_based`."
+    )
 
 
 if __name__ == "__main__":
