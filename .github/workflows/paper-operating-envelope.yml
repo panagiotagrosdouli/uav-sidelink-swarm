@@ -1,0 +1,87 @@
+name: paper-operating-envelope
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "simulations/paper_operating_envelope.py"
+      - "src/sidelink/**"
+      - "src/swarm_system.py"
+      - "src/channel_models/**"
+      - "tools/prepare_5glena_v5_bler.py"
+      - "tools/extract_5glena_bler.py"
+      - "paper/**"
+      - ".github/workflows/paper-operating-envelope.yml"
+
+jobs:
+  paper-campaign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run unit tests
+        run: python -m pytest -q
+      - name: Run bundled-fixture smoke validation
+        run: python -m simulations.paper_operating_envelope --smoke
+      - name: Prepare official 5G-LENA v5.0 full Table-1 BLER curves
+        run: python -m tools.prepare_5glena_v5_bler
+      - name: Run full 100-seed publication operating-envelope campaign
+        run: python -m simulations.paper_operating_envelope --seeds 100 --require-full-curves
+      - name: Record publication evidence and provenance
+        run: |
+          printf '%s\n' "${GITHUB_SHA}" > results/paper_operating_envelope/git_sha.txt
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          out = Path('results/paper_operating_envelope')
+          bler_manifest_path = Path('data/generated/5glena_v5_table1_bler_manifest.json')
+          bler = json.loads(bler_manifest_path.read_text())
+          payload = {
+              'git_sha': '${{ github.sha }}',
+              'workflow': 'paper-operating-envelope',
+              'seeds': 100,
+              'swarm_sizes': [5, 10, 20, 30, 50, 75, 100],
+              'resource_counts': [1, 2, 4, 8],
+              'directional_relative_advantage_db': [0.0, 3.0, 6.0, 9.0],
+              'success_policy_target': 0.10,
+              'goodput_policy_target_mbps': 1.0,
+              'classification': 'DERIVED_SYSTEM_LEVEL_EXPERIMENTAL_CAMPAIGN',
+              'bler_source': {
+                  'classification': bler['processed_data_classification'],
+                  'source_version': bler['source_version'],
+                  'release_commit_short': bler['release_commit_short'],
+                  'release_doi': bler['release_doi'],
+                  'source_sha256': bler['source_sha256'],
+                  'curves': bler['curves'],
+                  'base_graphs': bler['base_graphs'],
+              },
+              'resource_semantics': '133 PRBs exactly partitioned across orthogonal frequency resources; per-resource occupied bandwidth, noise, TBS and LDPC/CBS are recomputed',
+              'directionality_semantics': 'relative advantage G is +G/2 dB desired gain and -G/2 dB co-channel interference gain',
+              'non_claims': [
+                  'not measured swarm RF',
+                  'not normative NR sidelink Mode 1/2 scheduling',
+                  'not full MIMO/beam management',
+                  'not a universal maximum swarm-size result'
+              ]
+          }
+          (out / 'manifest.json').write_text(json.dumps(payload, indent=2) + '\n')
+          (out / '5glena_v5_table1_bler_manifest.json').write_text(json.dumps(bler, indent=2) + '\n')
+          PY
+      - name: Upload publication evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-operating-envelope-${{ github.sha }}
+          path: |
+            results/paper_operating_envelope/
+            figures/paper_operating_envelope/
+            paper/README.md
+          if-no-files-found: error
+          retention-days: 90
