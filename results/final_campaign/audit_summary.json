@@ -1,8 +1,13 @@
 {
-  "canonical_git_sha": "c293502a7410edf0c5c4cc982da9b449093b832b",
-  "workflow_run_id": 34029037140,
-  "scientific_audit_rows": 295,
+  "canonical_git_sha": "62b01a8dbb1fa5658f3071779d8604067fa1a5d8",
+  "workflow_run_id": 34035004298,
+  "scientific_audit_rows": 302,
   "scientific_audit_failures": 0,
+  "registered_experiments": 18,
+  "registered_experiments_success": 18,
+  "figure_count": 17,
+  "fig11_real_mobility_present": true,
+  "missing_external_or_optional_count": 0,
   "status": "pass",
-  "note": "The complete scientific_audit.csv is retained in the canonical GitHub Actions artifact."
+  "note": "The complete scientific_audit.csv and all canonical outputs are retained in the run #3 GitHub Actions artifact."
 }
