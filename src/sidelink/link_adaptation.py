@@ -19,20 +19,32 @@ def select_max_goodput_mcs(
     curves: list[BlerCurve],
     bandwidth_mhz: float,
     max_bler: float | None = None,
+    resource_fraction: float = 1.0,
 ) -> LinkChoice | None:
     """Choose the available sourced curve with highest expected PHY goodput.
 
-    `max_bler`, when supplied, is an EXPERIMENTAL policy constraint and must not
-    be called a 3GPP-required BLER target unless separately sourced.
+    This is THIS_WORK link adaptation, not normative 3GPP AMC. `max_bler`, when
+    supplied, is an EXPERIMENTAL policy constraint. `resource_fraction` accounts
+    for an explicitly modeled orthogonal resource share and defaults to one for
+    backward compatibility.
     """
     if not curves:
         return None
+    if not 0.0 < resource_fraction <= 1.0:
+        raise ValueError("resource_fraction must be in (0,1]")
     candidates: list[LinkChoice] = []
     for curve in curves:
         bler = float(curve.bler_at(sinr_db))
         if max_bler is not None and bler > max_bler:
             continue
-        goodput = float(spectral_goodput_mbps(curve, sinr_db, bandwidth_mhz))
+        goodput = float(
+            spectral_goodput_mbps(
+                curve,
+                sinr_db,
+                bandwidth_mhz,
+                resource_fraction=resource_fraction,
+            )
+        )
         candidates.append(
             LinkChoice(
                 mcs_index=curve.mcs_index,
@@ -43,4 +55,4 @@ def select_max_goodput_mcs(
         )
     if not candidates:
         return None
-    return max(candidates, key=lambda x: x.expected_phy_goodput_mbps)
+    return max(candidates, key=lambda x: (x.expected_phy_goodput_mbps, -x.mcs_index))
