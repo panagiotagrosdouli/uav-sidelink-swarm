@@ -14,7 +14,7 @@ Propagation and radio anchors come from Erdemir et al. (IEEE VTC 2023-Spring):
 - 100 m A2A altitude;
 - fitted A2A large-scale path-loss parameters `eta=2.166`, `PL0=34.650 dB`.
 
-The many-UAV scenario itself is not measured. Swarm size, placement, ring topology, simultaneous reuse, receiver noise figure and SINR threshold are experimental/synthetic quantities documented in `config/density_measurement_based.yaml` and `references/parameter_sources.md`.
+The many-UAV scenario itself is not measured. Swarm size, placement, pairing, simultaneous reuse, receiver noise figure and SINR threshold are experimental/synthetic quantities documented in `config/density_measurement_based.yaml` and `references/parameter_sources.md`.
 
 ## Experimental sweep
 
@@ -22,8 +22,11 @@ The many-UAV scenario itself is not measured. Swarm size, placement, ring topolo
 - 100 deterministic random seeds per UAV count;
 - equal altitude: 100 m;
 - synthetic uniform x/y positions inside 1000 m x 1000 m;
-- directed ring desired links;
-- all links active on the same resource in the baseline stress-test.
+- half-duplex-compatible disjoint desired links `(0->1), (2->3), ...`;
+- for odd N, the final UAV is idle in that snapshot;
+- all active pairs reuse one resource in the baseline stress-test.
+
+The disjoint-pair construction is intentional: it prevents a receiver from simultaneously transmitting on the same resource and removes artificial self-interference from the original ring prototype.
 
 ## Metrics
 
