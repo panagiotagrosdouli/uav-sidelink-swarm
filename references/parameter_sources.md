@@ -65,7 +65,7 @@ The implementation is a **large-scale model only**. It does not yet implement th
 | Carrier | 3.5 GHz | MEASURED campaign configuration | Erdemir et al. |
 | Bandwidth | 50 MHz | MEASURED campaign configuration | Erdemir et al. |
 | TX power | 30 dBm | MEASURED campaign configuration | Erdemir et al. |
-| Link topology | directed ring | SYNTHETIC | Reproducible communication graph |
+| Link topology | disjoint Tx->Rx pairs | SYNTHETIC | Half-duplex-compatible pairs `(0->1),(2->3),...`; avoids artificial self-interference |
 | Activity probability | 1.0 | EXPERIMENTAL_ASSUMPTION | Same-resource worst-case interference stress test |
 | Receiver noise figure | 7 dB | EXPERIMENTAL_ASSUMPTION | Not reported by Erdemir et al.; must be sensitivity-tested |
 | SINR threshold | 5 dB | EXPERIMENTAL_ASSUMPTION | Preliminary link-success proxy, not NR BLER |
@@ -76,7 +76,7 @@ The following are not measurements from the Erdemir et al. campaign:
 
 - swarm size and Monte-Carlo seeds;
 - random UAV placement;
-- ring topology and simultaneous resource reuse;
+- disjoint-pair topology and simultaneous resource reuse;
 - receiver noise figure;
 - SINR decoding threshold;
 - scheduler/resource-pool configuration;
