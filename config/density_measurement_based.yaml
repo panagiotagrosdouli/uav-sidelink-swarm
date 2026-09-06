@@ -1,0 +1,44 @@
+experiment:
+  name: density_measurement_based_a2a
+  swarm_sizes: [5, 10, 20, 30, 50]
+  seeds: 100
+  classification: EXPERIMENTAL_SWEEP
+
+geometry:
+  type: synthetic_equal_altitude_uniform_xy
+  area_xy_m: 1000
+  altitude_m: 100
+  classification: SYNTHETIC
+  note: "Equal altitude chosen to stay inside the validated equal-height A2A model path."
+
+radio:
+  center_frequency_ghz: 3.5
+  bandwidth_mhz: 50
+  transmitted_power_dbm: 30
+  source: "Erdemir et al., IEEE VTC 2023-Spring"
+  classification: MEASURED_CAMPAIGN_CONFIGURATION
+
+channel:
+  primary: measured_a2a_fit
+  comparison: [free_space, tr38901_case9_umi_av]
+  measured_fit:
+    pl0_db: 34.650
+    path_loss_exponent: 2.166
+    source: "Erdemir et al., Table II / Eq. (3)"
+    classification: MEASUREMENT_DERIVED
+
+traffic:
+  topology: ring
+  simultaneous_activity_probability: 1.0
+  classification: EXPERIMENTAL_ASSUMPTION
+  note: "All ring transmitters reuse one resource as a controlled worst-case interference stress test; not an NR scheduler model."
+
+receiver:
+  noise_figure_db: 7.0
+  classification: EXPERIMENTAL_ASSUMPTION
+  note: "Not reported by the A2A paper; sensitivity-test this value and never call it measured."
+
+link_success:
+  sinr_threshold_db: 5.0
+  classification: EXPERIMENTAL_ASSUMPTION
+  note: "Preliminary success proxy only; not NR BLER/PDR."
