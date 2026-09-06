@@ -58,6 +58,12 @@ SUMMARY_SOURCES = {
     "ula": "results/ula_directionality/summary.csv",
 }
 
+PROBABILITY_TOKENS = (
+    "bler", "success_probability", "delivery_ratio", "fairness",
+    "connectivity_probability", "fraction", "outage_proxy",
+)
+COUNT_NAMES = {"n", "count", "counts", "samples", "seeds"}
+
 
 def _git_sha() -> str:
     try:
@@ -74,12 +80,21 @@ def _copy_if_exists(source: Path, destination: Path) -> bool:
     return True
 
 
+def _is_count_column(column: str) -> bool:
+    name = column.lower()
+    return (
+        name in COUNT_NAMES
+        or name.endswith("_n")
+        or name.endswith("_count")
+        or name.endswith("_counts")
+        or name.endswith("_samples")
+        or name.endswith("_seeds")
+    )
+
+
 def _audit_dataframe(name: str, df: pd.DataFrame) -> list[dict[str, str]]:
+    """Audit numeric summary columns without confusing sample counts with metrics."""
     checks: list[dict[str, str]] = []
-    probability_tokens = [
-        "bler", "success_probability", "delivery_ratio", "fairness",
-        "connectivity_probability", "fraction", "outage_proxy",
-    ]
     for column in df.columns:
         numeric = pd.to_numeric(df[column], errors="coerce")
         if numeric.notna().sum() == 0:
@@ -88,13 +103,21 @@ def _audit_dataframe(name: str, df: pd.DataFrame) -> list[dict[str, str]]:
         status = "pass"
         note = ""
         lower_name = column.lower()
-        if any(token in lower_name for token in probability_tokens):
-            if np.any((values < -1e-12) | (values > 1.0 + 1e-12)):
-                status, note = "fail", "probability/fraction outside [0,1]"
-        if "latency" in lower_name and np.any(values < -1e-12):
-            status, note = "fail", "negative latency"
-        if "tbs" in lower_name and "bits" in lower_name and np.any(values <= 0):
-            status, note = "fail", "non-positive TBS"
+
+        if _is_count_column(column):
+            if np.any(values < -1e-12):
+                status, note = "fail", "negative sample/count value"
+            elif np.any(np.abs(values - np.rint(values)) > 1e-9):
+                status, note = "fail", "non-integer sample/count value"
+        else:
+            if any(token in lower_name for token in PROBABILITY_TOKENS):
+                if np.any((values < -1e-12) | (values > 1.0 + 1e-12)):
+                    status, note = "fail", "probability/fraction outside [0,1]"
+            if "latency" in lower_name and np.any(values < -1e-12):
+                status, note = "fail", "negative latency"
+            if "tbs" in lower_name and "bits" in lower_name and np.any(values <= 0):
+                status, note = "fail", "non-positive TBS"
+
         checks.append({"dataset": name, "column": column, "status": status, "note": note})
     return checks
 
@@ -139,15 +162,17 @@ def _write_key_findings(datasets: dict[str, pd.DataFrame], missing: list[str]) -
         "This file is generated from final-campaign result tables. Values are simulation/derived unless explicitly stated otherwise.\n\n",
     ]
     scaling = datasets.get("scaling")
-    if scaling is not None and {"metric", "family", "n_uavs", "mean", "ci95_low", "ci95_high"}.issubset(scaling.columns):
+    required = {"metric", "family", "n_uavs", "mean", "ci95_low", "ci95_high"}
+    if scaling is not None and required.issubset(scaling.columns):
         sinr = scaling[scaling.metric == "mean_sinr_db"]
         for family in ["fixed_area", "fixed_density"]:
             group = sinr[sinr.family == family].sort_values("n_uavs")
             if len(group) >= 2:
                 first, last = group.iloc[0], group.iloc[-1]
                 lines.append(
-                    f"- **Scaling ({family})**: mean SINR changes from {first['mean']:.2f} dB at N={int(first.n_uavs)} to {last['mean']:.2f} dB at N={int(last.n_uavs)}. "
-                    f"The final-point 95% CI is [{last.ci95_low:.2f}, {last.ci95_high:.2f}] dB.\n"
+                    f"- **Scaling ({family})**: mean SINR changes from {first['mean']:.2f} dB at N={int(first.n_uavs)} "
+                    f"to {last['mean']:.2f} dB at N={int(last.n_uavs)}; final-point 95% CI "
+                    f"[{last.ci95_low:.2f}, {last.ci95_high:.2f}] dB.\n"
                 )
     ablation = datasets.get("ablation")
     if ablation is not None and "mean_goodput_mbps_mean" in ablation:
@@ -156,8 +181,8 @@ def _write_key_findings(datasets: dict[str, pd.DataFrame], missing: list[str]) -
         if len(group):
             best = group.loc[group.mean_goodput_mbps_mean.idxmax()]
             lines.append(
-                f"- **Ablation at N={max_n}**: the highest mean modeled goodput among evaluated mechanisms is `{best.scenario}` at {best.mean_goodput_mbps_mean:.3f} Mbps. "
-                "This is a system-level comparison, not measured throughput.\n"
+                f"- **Ablation at N={max_n}**: highest mean modeled goodput among evaluated mechanisms is "
+                f"`{best.scenario}` at {best.mean_goodput_mbps_mean:.3f} Mbps. This is system-level modeled goodput, not measured throughput.\n"
             )
     resource = datasets.get("resource_allocation")
     if resource is not None and "mean_expected_phy_goodput_mbps" in resource:
@@ -166,12 +191,12 @@ def _write_key_findings(datasets: dict[str, pd.DataFrame], missing: list[str]) -
         if len(group):
             best = group.loc[group.mean_expected_phy_goodput_mbps.idxmax()]
             lines.append(
-                f"- **Resource allocation at N={max_n}**: the highest mean derived PHY goodput in the evaluated grid occurs for `{best.algorithm}` with {int(best.n_resources)} resources ({best.mean_expected_phy_goodput_mbps:.3f} Mbps).\n"
+                f"- **Resource allocation at N={max_n}**: highest mean derived PHY goodput in the evaluated grid occurs for "
+                f"`{best.algorithm}` with {int(best.n_resources)} resources ({best.mean_expected_phy_goodput_mbps:.3f} Mbps).\n"
             )
     if missing:
         lines.append("\n## External/missing evidence\n")
-        for item in missing:
-            lines.append(f"- {item}\n")
+        lines.extend(f"- {item}\n" for item in missing)
     (RESULT_OUT / "key_findings.md").write_text("".join(lines), encoding="utf-8")
 
 
@@ -205,6 +230,10 @@ def main() -> int:
         figure_status.append({"figure": stem, "source": source_str, "present": copied})
         if stem == "fig11_real_mobility" and not copied:
             missing.append("Real AMOVFLY canonical figure is unavailable because raw external telemetry is not vendored; run real_mobility_pair with user-supplied AMOVFLY files.")
+
+    bler_manifest = Path("data/generated/5glena_v5_table1_bler_manifest.json")
+    if bler_manifest.exists():
+        shutil.copy2(bler_manifest, RESULT_OUT / "5glena_v5_table1_bler_manifest.json")
 
     _parameter_provenance(config).to_csv(RESULT_OUT / "parameter_provenance.csv", index=False)
     _scenario_definitions(config).to_csv(RESULT_OUT / "scenario_definitions.csv", index=False)
