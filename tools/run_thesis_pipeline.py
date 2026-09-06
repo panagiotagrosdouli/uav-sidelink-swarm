@@ -1,6 +1,7 @@
 """Run the reproducible thesis experiment suite and record status/manifest."""
 from __future__ import annotations
 
+import argparse
 import csv
 import subprocess
 import sys
@@ -21,13 +22,33 @@ EXPERIMENTS = [
 ]
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="validate experiment registry and write a manifest without running simulations",
+    )
+    args = parser.parse_args(argv)
+
     out = Path("results/reproducibility")
     out.mkdir(parents=True, exist_ok=True)
     records: list[dict[str, object]] = []
     failed = False
 
     for name, command, classification in EXPERIMENTS:
+        if args.dry_run:
+            record = {
+                "name": name,
+                "command": " ".join(command),
+                "classification": classification,
+                "returncode": 0,
+                "status": "registered",
+            }
+            records.append(record)
+            print(f"[REGISTERED] {name}")
+            continue
+
         proc = subprocess.run(command, text=True, capture_output=True)
         record = {
             "name": name,
