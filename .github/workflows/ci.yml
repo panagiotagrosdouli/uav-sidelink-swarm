@@ -1,0 +1,33 @@
+name: scientific-ci
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run unit tests
+        run: python -m pytest -q
+      - name: Smoke-test measured baseline
+        run: python -m src.measured_a2a_baseline
+      - name: Smoke-test channel comparison
+        run: python -m simulations.channel_comparison
+      - name: Smoke-test density study
+        run: python -m simulations.density_measurement_based
+      - name: Smoke-test resource allocation
+        run: python -m simulations.resource_allocation_study
+      - name: Smoke-test routing
+        run: python -m simulations.routing_study
+      - name: Smoke-test beamforming sensitivity
+        run: python -m simulations.beamforming_sensitivity

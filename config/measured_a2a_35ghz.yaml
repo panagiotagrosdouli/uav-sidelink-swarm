@@ -1,0 +1,45 @@
+scenario:
+  name: erdemir_2023_a2a_measurement_reproduction
+  type: measurement_based_reproduction
+  environment: rural_like_hilly_forested_campus
+  tx_uav: DJI Matrice 600 Pro
+  rx_uav: DJI Matrice 600 Pro
+  altitude_m: 100
+  initial_separation_m: 85
+  tx_trajectory_length_m: 1000
+  tx_speed_mps: 3
+  measurement_period_ms: 100
+  approximate_experiment_duration_min: 6
+
+radio:
+  center_frequency_ghz: 3.5
+  bandwidth_mhz: 50
+  transmitted_power_dbm: 30
+  pn_sequence_length: 4095
+  delay_resolution_ns: 20
+  maximum_delay_us: 160
+
+channel:
+  model: measured_log_distance_a2a
+  reference_distance_m: 1
+  path_loss_exponent: 2.166
+  pl0_db: 34.650
+  equation: "PL(d) = PL0 + 10*n*log10(d/d0)"
+
+provenance:
+  classification: measurement_derived_model
+  source_title: "Measurement-based Channel Characterization for A2A and A2G Wireless Drone Communication Systems"
+  authors: "Ubeydullah Erdemir, Batuhan Kaplan, Ibrahim Hokelek, Ali Gorcin, Hakan Ali Cirpan"
+  venue: "2023 IEEE 97th Vehicular Technology Conference (VTC2023-Spring)"
+  year: 2023
+  doi: "10.1109/VTC2023-Spring57618.2023.10199853"
+  arxiv: "2306.08474"
+  source_locations:
+    measurement_system: "Sec. III-A / Table I"
+    measurement_environment: "Sec. III-B"
+    path_loss_model: "Eq. (3) and Table II / measurement results"
+  notes:
+    - "Campaign configuration and geometry are reported field-measurement values."
+    - "Path-loss exponent and PL0 are fitted/derived from measured A2A data."
+    - "Evaluating the fitted equation at new distances produces derived model values, not raw measurements."
+    - "No receiver noise figure, SINR threshold, traffic load, or swarm density is claimed as measured here."
