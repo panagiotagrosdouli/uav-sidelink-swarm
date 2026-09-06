@@ -19,56 +19,26 @@ EXPERIMENTS = [
     ("nr_link_performance", [sys.executable, "-m", "simulations.nr_link_performance_study"], "STANDARD_PLUS_LINK_LEVEL_SIMULATION_DERIVED"),
     ("harq_tbs_latency", [sys.executable, "-m", "simulations.harq_tbs_latency_study"], "STANDARD_PLUS_DERIVED_HARQ_ABSTRACTION"),
     ("sidelink_overhead_sensitivity", [sys.executable, "-m", "simulations.sidelink_overhead_sensitivity"], "EXPERIMENTAL_CONFIGURATION_SWEEP"),
+    ("final_campaign_smoke", [sys.executable, "-m", "simulations.final_experimental_campaign", "--smoke"], "CANONICAL_MULTI_DIMENSIONAL_DERIVED_CAMPAIGN_SMOKE"),
 ]
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="validate experiment registry and write a manifest without running simulations",
-    )
+    parser.add_argument("--dry-run", action="store_true", help="validate experiment registry and write a manifest without running simulations")
     args = parser.parse_args(argv)
-
-    out = Path("results/reproducibility")
-    out.mkdir(parents=True, exist_ok=True)
-    records: list[dict[str, object]] = []
-    failed = False
-
+    out = Path("results/reproducibility"); out.mkdir(parents=True, exist_ok=True)
+    records: list[dict[str, object]] = []; failed = False
     for name, command, classification in EXPERIMENTS:
         if args.dry_run:
-            record = {
-                "name": name,
-                "command": " ".join(command),
-                "classification": classification,
-                "returncode": 0,
-                "status": "registered",
-            }
-            records.append(record)
-            print(f"[REGISTERED] {name}")
-            continue
-
+            records.append({"name": name, "command": " ".join(command), "classification": classification, "returncode": 0, "status": "registered"}); print(f"[REGISTERED] {name}"); continue
         proc = subprocess.run(command, text=True, capture_output=True)
-        record = {
-            "name": name,
-            "command": " ".join(command),
-            "classification": classification,
-            "returncode": proc.returncode,
-            "status": "success" if proc.returncode == 0 else "failed",
-        }
-        records.append(record)
+        record = {"name": name, "command": " ".join(command), "classification": classification, "returncode": proc.returncode, "status": "success" if proc.returncode == 0 else "failed"}; records.append(record)
         if proc.returncode != 0:
-            failed = True
-            print(f"[FAIL] {name}\n{proc.stdout}\n{proc.stderr}", file=sys.stderr)
-        else:
-            print(f"[OK] {name}")
-
+            failed = True; print(f"[FAIL] {name}\n{proc.stdout}\n{proc.stderr}", file=sys.stderr)
+        else: print(f"[OK] {name}")
     with (out / "experiment_status.csv").open("w", newline="", encoding="utf-8") as fh:
-        writer = csv.DictWriter(fh, fieldnames=["name", "command", "classification", "returncode", "status"])
-        writer.writeheader()
-        writer.writerows(records)
-
+        writer = csv.DictWriter(fh, fieldnames=["name", "command", "classification", "returncode", "status"]); writer.writeheader(); writer.writerows(records)
     write_manifest(out / "run_manifest.json", records)
     return 1 if failed else 0
 
