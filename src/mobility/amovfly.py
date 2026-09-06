@@ -4,10 +4,12 @@ AMOVFLY is used only as a mobility/telemetry source. Applying propagation or
 sidelink models to these positions produces simulated RF quantities, not RF
 measurements.
 
-When global latitude/longitude/altitude are available for both UAVs, pair
-synchronization converts them to one common WGS-84 ECEF/ENU frame before A2A
-distances are calculated. Local gps_x/gps_y/gps_z are used only as an explicit
-fallback because their origins must not silently be assumed identical.
+AMOVFLY documents ``gps_x/gps_y`` as position relative to each UAV's takeoff
+point, ``gps_z`` as altitude above ground, and ``real_lat/real_long`` as the
+actual global trajectory. For multi-UAV analysis, ``auto`` therefore uses
+WGS-84 latitude/longitude to derive one common horizontal ENU frame and the
+measured AGL ``gps_z`` as vertical coordinate. Direct subtraction of local
+``gps_x/gps_y`` remains an explicit fallback only.
 """
 from __future__ import annotations
 
@@ -21,10 +23,7 @@ import pandas as pd
 
 from src.mobility.geodesy import geodetic_to_enu
 
-TIME_COLUMN = "time"
-LOCAL_COLUMNS = ("gps_x", "gps_y", "gps_z")
-GLOBAL_COLUMNS = ("gps_lat", "gps_lon", "altitude")
-CoordinateMode = Literal["auto", "global_enu", "local_assumed_common"]
+CoordinateMode = Literal["auto", "global_horizontal_agl", "local_assumed_common"]
 
 
 @dataclass(frozen=True)
@@ -35,8 +34,8 @@ class Trajectory:
     classification: str = "MEASURED_DATASET"
 
     @property
-    def has_global_coordinates(self) -> bool:
-        return {"latitude_deg", "longitude_deg", "altitude_m"}.issubset(self.data.columns)
+    def has_global_horizontal_agl(self) -> bool:
+        return {"latitude_deg", "longitude_deg", "z_m"}.issubset(self.data.columns)
 
     @property
     def has_local_coordinates(self) -> bool:
@@ -44,29 +43,37 @@ class Trajectory:
 
 
 def load_ready_csv(path: str | Path, uav_name: str | None = None) -> Trajectory:
-    """Load an AMOVFLY ready-data CSV while preserving local and global coordinates."""
+    """Load one documented AMOVFLY ready-data CSV."""
     path = Path(path)
     df = pd.read_csv(path)
     unnamed = [c for c in df.columns if str(c).startswith("Unnamed:") or str(c) == ""]
     if unnamed:
         df = df.drop(columns=unnamed)
-    if TIME_COLUMN not in df.columns:
+    if "time" not in df.columns:
         raise ValueError("missing AMOVFLY time column")
-    has_local = set(LOCAL_COLUMNS).issubset(df.columns)
-    has_global = set(GLOBAL_COLUMNS).issubset(df.columns)
-    if not has_local and not has_global:
-        raise ValueError(
-            "trajectory needs either gps_x/gps_y/gps_z or gps_lat/gps_lon/altitude"
-        )
 
-    selected = [TIME_COLUMN]
+    has_local = {"gps_x", "gps_y", "gps_z"}.issubset(df.columns)
+    # Current public ready-data schema uses real_lat/real_long. Older aliases are
+    # accepted only to keep the loader robust to dataset revisions.
+    if {"real_lat", "real_long"}.issubset(df.columns):
+        lat_col, lon_col = "real_lat", "real_long"
+    elif {"gps_lat", "gps_lon"}.issubset(df.columns):
+        lat_col, lon_col = "gps_lat", "gps_lon"
+    else:
+        lat_col = lon_col = None
+    has_global_horizontal = lat_col is not None and "gps_z" in df.columns
+    if not has_local and not has_global_horizontal:
+        raise ValueError("trajectory needs AMOVFLY local coordinates or real_lat/real_long + gps_z")
+
+    selected = ["time"]
     if has_local:
-        selected.extend(LOCAL_COLUMNS)
-    if has_global:
-        selected.extend(GLOBAL_COLUMNS)
-    # Preserve reported ground-speed/velocity fields when present for validation.
-    for optional in ("gps_speed", "gps_vx", "gps_vy", "gps_vz"):
-        if optional in df.columns:
+        selected.extend(["gps_x", "gps_y", "gps_z"])
+    elif "gps_z" in df.columns:
+        selected.append("gps_z")
+    if has_global_horizontal:
+        selected.extend([lat_col, lon_col])
+    for optional in ("gps_speed", "gps_vx", "gps_vy", "gps_vz", "v_x", "v_y", "v_z"):
+        if optional in df.columns and optional not in selected:
             selected.append(optional)
 
     out = df.loc[:, selected].copy()
@@ -75,32 +82,27 @@ def load_ready_csv(path: str | Path, uav_name: str | None = None) -> Trajectory:
         "gps_x": "x_m",
         "gps_y": "y_m",
         "gps_z": "z_m",
+        "real_lat": "latitude_deg",
+        "real_long": "longitude_deg",
         "gps_lat": "latitude_deg",
         "gps_lon": "longitude_deg",
-        "altitude": "altitude_m",
         "gps_speed": "reported_speed_mps",
         "gps_vx": "reported_vx_mps",
         "gps_vy": "reported_vy_mps",
         "gps_vz": "reported_vz_mps",
+        "v_x": "reported_vx_mps",
+        "v_y": "reported_vy_mps",
+        "v_z": "reported_vz_mps",
     }
     out = out.rename(columns=rename)
-    out = out.apply(pd.to_numeric, errors="coerce")
+    out = out.loc[:, ~out.columns.duplicated()].apply(pd.to_numeric, errors="coerce")
     out = out.dropna(subset=["time_s"]).sort_values("time_s")
-    # Rows need one complete coordinate representation.
-    if has_global:
-        global_ok = out[["latitude_deg", "longitude_deg", "altitude_m"]].notna().all(axis=1)
-    else:
-        global_ok = pd.Series(False, index=out.index)
-    if has_local:
-        local_ok = out[["x_m", "y_m", "z_m"]].notna().all(axis=1)
-    else:
-        local_ok = pd.Series(False, index=out.index)
-    out = out[global_ok | local_ok]
+    coordinate_columns = [c for c in ("x_m", "y_m", "z_m", "latitude_deg", "longitude_deg") if c in out]
+    out = out.dropna(subset=coordinate_columns if coordinate_columns else ["time_s"])
     out = out.drop_duplicates(subset="time_s", keep="first").reset_index(drop=True)
     if out.empty:
         raise ValueError("trajectory contains no valid coordinate samples")
-    name = uav_name or path.stem
-    return Trajectory(uav_name=name, data=out)
+    return Trajectory(uav_name=uav_name or path.stem, data=out)
 
 
 def parse_takeoff_time(value: str) -> datetime:
@@ -112,39 +114,43 @@ def _common_frame_pair(
     second: Trajectory,
     mode: CoordinateMode,
 ) -> tuple[pd.DataFrame, pd.DataFrame, str]:
-    use_global = mode == "global_enu" or (
-        mode == "auto" and first.has_global_coordinates and second.has_global_coordinates
+    use_global = mode == "global_horizontal_agl" or (
+        mode == "auto" and first.has_global_horizontal_agl and second.has_global_horizontal_agl
     )
     if use_global:
-        if not first.has_global_coordinates or not second.has_global_coordinates:
-            raise ValueError("global_enu requires global coordinates for both trajectories")
-        # One shared reference is sufficient; ENU remains a metric local frame while
-        # both input tracks are transformed from the same WGS-84 Earth frame.
+        if not first.has_global_horizontal_agl or not second.has_global_horizontal_agl:
+            raise ValueError("global_horizontal_agl requires latitude/longitude/gps_z for both UAVs")
         ref = first.data.iloc[0]
-        ref_lat = float(ref.latitude_deg)
-        ref_lon = float(ref.longitude_deg)
-        ref_alt = float(ref.altitude_m)
+        ref_lat, ref_lon = float(ref.latitude_deg), float(ref.longitude_deg)
 
         def transformed(traj: Trajectory) -> pd.DataFrame:
             df = traj.data.copy()
+            # Set ellipsoidal altitude to zero for all samples so ENU x/y derive
+            # solely from global horizontal coordinates. The dataset's measured
+            # AGL gps_z is then retained separately as the vertical coordinate.
+            zeros = np.zeros(len(df), dtype=float)
             enu = geodetic_to_enu(
                 df.latitude_deg.to_numpy(),
                 df.longitude_deg.to_numpy(),
-                df.altitude_m.to_numpy(),
+                zeros,
                 ref_lat,
                 ref_lon,
-                ref_alt,
+                0.0,
             )
-            df["x_m"], df["y_m"], df["z_m"] = enu[:, 0], enu[:, 1], enu[:, 2]
+            df["x_m"], df["y_m"] = enu[:, 0], enu[:, 1]
             return df
 
-        return transformed(first), transformed(second), "WGS84_ECEF_TO_COMMON_ENU"
+        return (
+            transformed(first),
+            transformed(second),
+            "WGS84_COMMON_HORIZONTAL_ENU_PLUS_MEASURED_AGL_Z",
+        )
 
     if mode not in ("auto", "local_assumed_common"):
         raise ValueError(f"unknown coordinate mode {mode}")
     if not first.has_local_coordinates or not second.has_local_coordinates:
         raise ValueError("local fallback requires local coordinates for both trajectories")
-    return first.data.copy(), second.data.copy(), "LOCAL_FRAME_ASSUMED_COMMON"
+    return first.data.copy(), second.data.copy(), "LOCAL_XY_FRAME_ASSUMED_COMMON"
 
 
 def synchronize_pair(
@@ -155,51 +161,32 @@ def synchronize_pair(
     sample_period_s: float = 0.2,
     coordinate_mode: CoordinateMode = "auto",
 ) -> pd.DataFrame:
-    """Synchronize two measured trajectories on a common absolute-time axis.
-
-    Linear interpolation and coordinate transformation are
-    DERIVED_FROM_MEASURED_DATASET operations. Samples are emitted only over the
-    interval where both flights overlap.
-    """
+    """Synchronize two measured trajectories over their common time interval."""
     if sample_period_s <= 0:
         raise ValueError("sample_period_s must be positive")
-
     a, b, coordinate_source = _common_frame_pair(first, second, coordinate_mode)
     a["absolute_s"] = first_takeoff.timestamp() + a.time_s
     b["absolute_s"] = second_takeoff.timestamp() + b.time_s
-
     start = max(float(a.absolute_s.min()), float(b.absolute_s.min()))
     end = min(float(a.absolute_s.max()), float(b.absolute_s.max()))
     if end <= start:
         raise ValueError("trajectories do not overlap in time")
-
     grid = np.arange(start, end + 0.5 * sample_period_s, sample_period_s)
 
     def interp(df: pd.DataFrame, column: str) -> np.ndarray:
         return np.interp(grid, df.absolute_s.to_numpy(), df[column].to_numpy())
 
-    out = pd.DataFrame(
-        {
-            "absolute_time_s": grid,
-            "elapsed_overlap_s": grid - start,
-            "uav1_x_m": interp(a, "x_m"),
-            "uav1_y_m": interp(a, "y_m"),
-            "uav1_z_m": interp(a, "z_m"),
-            "uav2_x_m": interp(b, "x_m"),
-            "uav2_y_m": interp(b, "y_m"),
-            "uav2_z_m": interp(b, "z_m"),
-        }
-    )
-    dx = out.uav1_x_m - out.uav2_x_m
-    dy = out.uav1_y_m - out.uav2_y_m
-    dz = out.uav1_z_m - out.uav2_z_m
+    out = pd.DataFrame({
+        "absolute_time_s": grid,
+        "elapsed_overlap_s": grid - start,
+        "uav1_x_m": interp(a, "x_m"), "uav1_y_m": interp(a, "y_m"), "uav1_z_m": interp(a, "z_m"),
+        "uav2_x_m": interp(b, "x_m"), "uav2_y_m": interp(b, "y_m"), "uav2_z_m": interp(b, "z_m"),
+    })
+    dx, dy, dz = out.uav1_x_m - out.uav2_x_m, out.uav1_y_m - out.uav2_y_m, out.uav1_z_m - out.uav2_z_m
     out["a2a_distance_m"] = np.sqrt(dx * dx + dy * dy + dz * dz)
-
     if len(out) >= 2:
-        dt = float(sample_period_s)
         rel = np.column_stack([dx.to_numpy(), dy.to_numpy(), dz.to_numpy()])
-        drel_dt = np.gradient(rel, dt, axis=0)
-        out["relative_speed_mps"] = np.linalg.norm(drel_dt, axis=1)
+        out["relative_speed_mps"] = np.linalg.norm(np.gradient(rel, sample_period_s, axis=0), axis=1)
     else:
         out["relative_speed_mps"] = 0.0
     out["coordinate_source"] = coordinate_source
