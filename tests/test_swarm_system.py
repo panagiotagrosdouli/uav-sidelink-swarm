@@ -4,6 +4,7 @@ from src.swarm_system import (
     SwarmConfig,
     build_disjoint_pairs,
     dbm_to_w,
+    simulate_positions,
     simulate_snapshot,
     thermal_noise_dbm,
 )
@@ -38,3 +39,35 @@ def test_snapshot_is_reproducible():
     p2, l2 = simulate_snapshot(cfg)
     assert p1.equals(p2)
     assert l1.equals(l2)
+
+
+def test_orthogonal_resources_remove_cochannel_interference():
+    cfg = SwarmConfig(n_uavs=4, seed=1, activity_probability=1.0)
+    positions = np.array(
+        [[0.0, 0.0, 100.0], [10.0, 0.0, 100.0], [0.0, 10.0, 100.0], [10.0, 10.0, 100.0]]
+    )
+    active = np.array([True, True])
+    _, shared = simulate_positions(cfg, positions, resources=[0, 0], active_mask=active)
+    _, separate = simulate_positions(cfg, positions, resources=[0, 1], active_mask=active)
+    assert np.all(shared.n_interferers.to_numpy() == 1)
+    assert np.all(separate.n_interferers.to_numpy() == 0)
+    assert np.all(separate.sinr_db.to_numpy() > shared.sinr_db.to_numpy())
+
+
+def test_directional_terms_have_expected_sign():
+    cfg = SwarmConfig(n_uavs=4, seed=2, activity_probability=1.0)
+    positions = np.array(
+        [[0.0, 0.0, 100.0], [50.0, 0.0, 100.0], [0.0, 50.0, 100.0], [50.0, 50.0, 100.0]]
+    )
+    active = [True, True]
+    _, baseline = simulate_positions(cfg, positions, active_mask=active)
+    _, improved = simulate_positions(
+        cfg,
+        positions,
+        active_mask=active,
+        desired_gain_db=3.0,
+        interference_suppression_db=3.0,
+    )
+    assert np.all(improved.rx_power_dbm.to_numpy() > baseline.rx_power_dbm.to_numpy())
+    assert np.all(improved.interference_dbm.to_numpy() < baseline.interference_dbm.to_numpy())
+    assert np.all(improved.sinr_db.to_numpy() > baseline.sinr_db.to_numpy())
