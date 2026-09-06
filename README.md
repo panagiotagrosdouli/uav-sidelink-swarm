@@ -108,7 +108,7 @@ pip install -r requirements.txt
 pytest -q
 ```
 
-GitHub Actions also runs the unit tests and baseline smoke checks.
+GitHub Actions also runs the unit tests and baseline smoke checks. See `docs/experiments/006_validation_status.md` for the exact implemented boundary.
 
 ## Repository structure
 
@@ -153,6 +153,6 @@ Until an MCS/BLER link model is sourced and validated, `link_success_proxy` rema
 - U. Erdemir et al., IEEE VTC 2023-Spring, DOI `10.1109/VTC2023-Spring57618.2023.10199853`.
 - 3GPP TR 38.901 V19.4.0, Release 19.
 - 3GPP TR 36.777, aerial-vehicle channel-model annexes.
-- 3GPP TS 38.214 / TS 38.213 for NR physical-layer procedure background.
+- 3GPP TS 38.214 / TS 38.213 V19.4.0 for NR physical-layer procedure background.
 
 Detailed parameter provenance is maintained in `references/parameter_sources.md`.
