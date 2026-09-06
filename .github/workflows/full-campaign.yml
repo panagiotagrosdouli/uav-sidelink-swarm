@@ -1,0 +1,54 @@
+name: full-experimental-campaign
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "simulations/**"
+      - "config/final_campaign.yaml"
+      - "tools/fetch_5glena_v5_bler.py"
+      - ".github/workflows/full-campaign.yml"
+
+jobs:
+  final-campaign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Fetch pinned 5G-LENA v5.0 Table-1 BLER source and process all curves
+        run: python -m tools.fetch_5glena_v5_bler data/generated/5glena_v5_table1_full.csv
+      - name: Run canonical 100-seed final campaign
+        run: python -m simulations.final_experimental_campaign --curves data/generated/5glena_v5_table1_full.csv
+      - name: Run pinned public AMOVFLY measured-mobility pair
+        run: python -m simulations.real_mobility_amovfly_public --curves data/generated/5glena_v5_table1_full.csv
+      - name: Record final commit SHA
+        run: |
+          printf '%s\n' "${GITHUB_SHA}" > results/final_campaign/frozen_git_sha.txt
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('results/final_campaign/final_campaign_manifest.json')
+          data = json.loads(path.read_text())
+          data['frozen_git_sha'] = '${{ github.sha }}'
+          data['canonical_full_run'] = True
+          path.write_text(json.dumps(data, indent=2) + '\n')
+          PY
+      - name: Upload frozen final experimental evidence bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-uav-sidelink-campaign-${{ github.sha }}
+          path: |
+            results/final_campaign/
+            figures/final_campaign/
+            config/final_campaign.yaml
+          if-no-files-found: error
+          retention-days: 90
