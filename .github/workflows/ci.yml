@@ -31,3 +31,5 @@ jobs:
         run: python -m simulations.routing_study
       - name: Smoke-test beamforming sensitivity
         run: python -m simulations.beamforming_sensitivity
+      - name: Smoke-test NR MCS/BLER link performance
+        run: python -m simulations.nr_link_performance_study
