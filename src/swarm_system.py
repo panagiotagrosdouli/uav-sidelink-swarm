@@ -75,6 +75,16 @@ def received_power_w(tx: int, rx: int, positions: np.ndarray, cfg: SwarmConfig) 
     return float(dbm_to_w(pr_dbm)), d, pl_db
 
 
+def build_disjoint_pairs(n_uavs: int) -> list[tuple[int, int]]:
+    """Return half-duplex-compatible disjoint Tx->Rx pairs.
+
+    UAVs are paired as (0->1), (2->3), ... . For odd N, the last UAV is idle in
+    that snapshot. This prevents a receiver from simultaneously transmitting on
+    the same resource and avoids artificial self-interference.
+    """
+    return [(i, i + 1) for i in range(0, n_uavs - 1, 2)]
+
+
 def simulate_snapshot(cfg: SwarmConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
     if cfg.n_uavs < 2:
         raise ValueError("n_uavs must be at least 2")
@@ -83,10 +93,10 @@ def simulate_snapshot(cfg: SwarmConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
     noise_dbm = thermal_noise_dbm(cfg.bandwidth_mhz * 1e6, cfg.noise_figure_db)
     noise_w = float(dbm_to_w(noise_dbm))
 
-    desired = [(i, (i + 1) % cfg.n_uavs) for i in range(cfg.n_uavs)]
-    active = rng.random(cfg.n_uavs) < cfg.activity_probability
-    if not np.any(active):
-        active[rng.integers(0, cfg.n_uavs)] = True
+    desired = build_disjoint_pairs(cfg.n_uavs)
+    active = rng.random(len(desired)) < cfg.activity_probability
+    if len(desired) and not np.any(active):
+        active[rng.integers(0, len(desired))] = True
 
     rows: list[dict[str, float | int | bool | str]] = []
     for link_id, (tx, rx) in enumerate(desired):
