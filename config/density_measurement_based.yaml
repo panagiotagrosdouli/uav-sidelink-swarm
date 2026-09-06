@@ -28,10 +28,10 @@ channel:
     classification: MEASUREMENT_DERIVED
 
 traffic:
-  topology: ring
+  topology: disjoint_tx_rx_pairs
   simultaneous_activity_probability: 1.0
   classification: EXPERIMENTAL_ASSUMPTION
-  note: "All ring transmitters reuse one resource as a controlled worst-case interference stress test; not an NR scheduler model."
+  note: "Pairs are (0->1), (2->3), ...; odd last UAV is idle. All active pairs reuse one resource as a controlled interference stress test. This avoids artificial self-interference and is not an NR scheduler model."
 
 receiver:
   noise_figure_db: 7.0
