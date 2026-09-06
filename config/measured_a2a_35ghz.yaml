@@ -27,12 +27,19 @@ channel:
   equation: "PL(d) = PL0 + 10*n*log10(d/d0)"
 
 provenance:
-  classification: measured_published
+  classification: measurement_derived_model
   source_title: "Measurement-based Channel Characterization for A2A and A2G Wireless Drone Communication Systems"
   authors: "Ubeydullah Erdemir, Batuhan Kaplan, Ibrahim Hokelek, Ali Gorcin, Hakan Ali Cirpan"
+  venue: "2023 IEEE 97th Vehicular Technology Conference (VTC2023-Spring)"
   year: 2023
+  doi: "10.1109/VTC2023-Spring57618.2023.10199853"
   arxiv: "2306.08474"
+  source_locations:
+    measurement_system: "Sec. III-A / Table I"
+    measurement_environment: "Sec. III-B"
+    path_loss_model: "Eq. (3) and Table II / measurement results"
   notes:
-    - "Values above are reported by the field measurement campaign in the cited paper."
-    - "The fitted path-loss parameters are measurement-derived for the A2A scenario."
-    - "This file does not invent a receiver noise figure, SINR threshold, traffic load, or swarm density."
+    - "Campaign configuration and geometry are reported field-measurement values."
+    - "Path-loss exponent and PL0 are fitted/derived from measured A2A data."
+    - "Evaluating the fitted equation at new distances produces derived model values, not raw measurements."
+    - "No receiver noise figure, SINR threshold, traffic load, or swarm density is claimed as measured here."
