@@ -37,3 +37,13 @@ jobs:
         run: python -m simulations.harq_tbs_latency_study
       - name: Smoke-test sidelink overhead sensitivity
         run: python -m simulations.sidelink_overhead_sensitivity
+      - name: Validate reproducible thesis registry
+        run: python -m tools.run_thesis_pipeline --dry-run
+      - name: Upload scientific outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: thesis-scientific-outputs-${{ github.sha }}
+          path: |
+            results/
+            figures/
+          if-no-files-found: warn
