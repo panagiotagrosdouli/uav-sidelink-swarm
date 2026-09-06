@@ -1,9 +1,8 @@
 """Collate canonical experimental outputs into final_campaign directories.
 
-This tool does not run simulations. Run the full registered thesis pipeline
-first, then call this finalizer. It copies stable figure names, collates summary
-tables, writes a manifest, performs range/sanity audits and generates cautious
-key findings only from existing numerical results.
+Run the full registered thesis pipeline first, then call this finalizer. It copies
+stable figure names, collates summary tables, writes a manifest, performs
+range/sanity audits and generates cautious key findings only from existing data.
 """
 from __future__ import annotations
 
@@ -19,16 +18,15 @@ import numpy as np
 import pandas as pd
 import yaml
 
-ROOT = Path(".")
 RESULT_OUT = Path("results/final_campaign")
 FIG_OUT = Path("figures/final_campaign")
 
 FIGURE_MAP = {
-    "fig01_channel_models": "figures/channel_comparison/path_loss_comparison.pdf",
-    "fig02_sinr_density": "figures/density/mean_sinr_vs_density.pdf",
+    "fig01_channel_models": "figures/pathloss/pathloss_comparison.pdf",
+    "fig02_sinr_density": "figures/density/mean_sinr_vs_swarm_size.pdf",
     "fig03_sinr_cdf": "figures/density/sinr_cdf.pdf",
-    "fig04_bler_density": "figures/nr_link_performance/mean_bler_vs_density.pdf",
-    "fig05_goodput_density": "figures/nr_link_performance/mean_expected_phy_goodput_vs_density.pdf",
+    "fig04_bler_density": "figures/nr_link_performance/bler_vs_density.pdf",
+    "fig05_goodput_density": "figures/nr_link_performance/goodput_vs_density.pdf",
     "fig06_latency_density": "figures/harq_tbs_latency/latency_vs_density.pdf",
     "fig07_resource_allocation": "figures/resource_allocation/goodput_resources_n50.pdf",
     "fig08_routing": "figures/routing/direct_vs_multihop_reliability.pdf",
@@ -78,6 +76,10 @@ def _copy_if_exists(source: Path, destination: Path) -> bool:
 
 def _audit_dataframe(name: str, df: pd.DataFrame) -> list[dict[str, str]]:
     checks: list[dict[str, str]] = []
+    probability_tokens = [
+        "bler", "success_probability", "delivery_ratio", "fairness",
+        "connectivity_probability", "fraction", "outage_proxy",
+    ]
     for column in df.columns:
         numeric = pd.to_numeric(df[column], errors="coerce")
         if numeric.notna().sum() == 0:
@@ -86,7 +88,7 @@ def _audit_dataframe(name: str, df: pd.DataFrame) -> list[dict[str, str]]:
         status = "pass"
         note = ""
         lower_name = column.lower()
-        if any(token in lower_name for token in ["bler", "success_probability", "delivery_ratio", "fairness", "connectivity_probability", "fraction"]):
+        if any(token in lower_name for token in probability_tokens):
             if np.any((values < -1e-12) | (values > 1.0 + 1e-12)):
                 status, note = "fail", "probability/fraction outside [0,1]"
         if "latency" in lower_name and np.any(values < -1e-12):
@@ -133,11 +135,11 @@ def _scenario_definitions(config: dict) -> pd.DataFrame:
 
 def _write_key_findings(datasets: dict[str, pd.DataFrame], missing: list[str]) -> None:
     lines = [
-        "# Evidence-backed key findings\n",
-        "This file is generated from final-campaign result tables. Values are simulation/derived unless explicitly stated otherwise.\n",
+        "# Evidence-backed key findings\n\n",
+        "This file is generated from final-campaign result tables. Values are simulation/derived unless explicitly stated otherwise.\n\n",
     ]
     scaling = datasets.get("scaling")
-    if scaling is not None:
+    if scaling is not None and {"metric", "family", "n_uavs", "mean", "ci95_low", "ci95_high"}.issubset(scaling.columns):
         sinr = scaling[scaling.metric == "mean_sinr_db"]
         for family in ["fixed_area", "fixed_density"]:
             group = sinr[sinr.family == family].sort_values("n_uavs")
