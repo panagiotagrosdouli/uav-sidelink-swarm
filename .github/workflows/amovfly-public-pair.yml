@@ -1,0 +1,37 @@
+name: amovfly-public-pair
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/mobility/amovfly.py'
+      - 'simulations/real_mobility_pair.py'
+      - '.github/workflows/amovfly-public-pair.yml'
+jobs:
+  real-mobility:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: .
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Download published simultaneous AMOVFLY pair without vendoring it
+        run: |
+          mkdir -p data/external/amovfly
+          curl -fL 'https://raw.githubusercontent.com/YujiaoHu/AMOVFLY-Dataset/main/FAFS/FAFS/UavY_P0A10S6_1.csv' -o data/external/amovfly/UavY_P0A10S6_1.csv
+          curl -fL 'https://raw.githubusercontent.com/YujiaoHu/AMOVFLY-Dataset/main/FAVS/FAVS/UavR_P0A40VarS8_1.csv' -o data/external/amovfly/UavR_P0A40VarS8_1.csv
+      - name: Run measured-mobility pair analysis
+        run: |
+          python -m simulations.real_mobility_pair \
+            --uav1-file data/external/amovfly/UavY_P0A10S6_1.csv --uav1-time '2024/11/21 13:50' \
+            --uav2-file data/external/amovfly/UavR_P0A40VarS8_1.csv --uav2-time '2024/11/21 13:46'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: amovfly-public-pair-${{ github.sha }}
+          path: |
+            results/real_mobility_pair/
+            figures/mobility/
+          if-no-files-found: error
