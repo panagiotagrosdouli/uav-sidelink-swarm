@@ -17,6 +17,8 @@ jobs:
           python-version: "3.12"
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Validate finalizer audit logic
+        run: python -m pytest -q tests/test_finalizer_audit.py
       - name: Prepare official 5G-LENA v5.0 BLER dataset
         run: python -m tools.prepare_5glena_v5_bler
       - name: Run full registered experimental campaign
