@@ -1,42 +1,23 @@
-"""Sweep swarm size and export SINR/PDR summary statistics."""
-from pathlib import Path
+"""DEPRECATED entry point for the old density prototype.
 
-import pandas as pd
+The old sweep depended on ``src.sinr_sim`` and therefore inherited a conflicting
+5.9 GHz baseline. Use ``simulations.density_measurement_based`` or the final
+campaign instead.
+"""
+from __future__ import annotations
 
-from src.sinr_sim import Config, simulate
+import warnings
+
+from simulations.density_measurement_based import main as canonical_main
 
 
 def main() -> None:
-    rows = []
-    for n in [5, 10, 20, 30, 50]:
-        for seed in range(20):
-            cfg = Config(n_uavs=n, seed=seed, activity_probability=0.35)
-            _, links = simulate(cfg)
-            if links.empty:
-                continue
-            rows.append({
-                "n_uavs": n,
-                "seed": seed,
-                "active_links": len(links),
-                "mean_sinr_db": links.sinr_db.mean(),
-                "median_sinr_db": links.sinr_db.median(),
-                "pdr_proxy": links.success.mean(),
-                "mean_shannon_upper_bound_mbps": links.shannon_upper_bound_mbps.mean(),
-            })
-
-    out = Path("results/density_sweep")
-    out.mkdir(parents=True, exist_ok=True)
-    df = pd.DataFrame(rows)
-    df.to_csv(out / "per_seed.csv", index=False)
-    summary = df.groupby("n_uavs").agg(
-        mean_sinr_db=("mean_sinr_db", "mean"),
-        std_sinr_db=("mean_sinr_db", "std"),
-        mean_pdr_proxy=("pdr_proxy", "mean"),
-        std_pdr_proxy=("pdr_proxy", "std"),
-        mean_shannon_upper_bound_mbps=("mean_shannon_upper_bound_mbps", "mean"),
-    ).reset_index()
-    summary.to_csv(out / "summary.csv", index=False)
-    print(summary.to_string(index=False))
+    warnings.warn(
+        "simulations.run_density_sweep is deprecated; using density_measurement_based",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    canonical_main()
 
 
 if __name__ == "__main__":
