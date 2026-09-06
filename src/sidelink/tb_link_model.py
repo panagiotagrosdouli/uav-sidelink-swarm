@@ -6,10 +6,8 @@ code-block decoding events, so it is a DERIVED system-level approximation.
 """
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 
-from src.sidelink.bler_io import load_bler_curves
 from src.sidelink.ldpc import code_block_segmentation
 from src.sidelink.link_performance import BlerCurve
 from src.sidelink.nr_mcs import get_mcs
@@ -31,18 +29,51 @@ class TbLinkEstimate:
         return 1.0 - self.transport_block_bler
 
 
+# `closest_curve` is called very frequently by TBS-aware link adaptation.  The
+# full 5G-LENA Table-1 dictionary is immutable during an experiment, so indexing
+# it once by (MCS, base graph) avoids repeatedly scanning every sourced curve.
+# The cache stores the original dictionary object alongside the index to guard
+# against Python object-id reuse; curve-selection semantics and tie-breaking are
+# otherwise unchanged.
+_CURVE_INDEX_CACHE: dict[
+    int,
+    tuple[
+        dict[tuple[int, int, int], BlerCurve],
+        dict[tuple[int, int], tuple[BlerCurve, ...]],
+    ],
+] = {}
+
+
+def _curve_index(
+    curves: dict[tuple[int, int, int], BlerCurve],
+) -> dict[tuple[int, int], tuple[BlerCurve, ...]]:
+    cache_key = id(curves)
+    cached = _CURVE_INDEX_CACHE.get(cache_key)
+    if cached is not None and cached[0] is curves:
+        return cached[1]
+
+    grouped: dict[tuple[int, int], list[BlerCurve]] = {}
+    for (mcs, bg, _), curve in curves.items():
+        grouped.setdefault((int(mcs), int(bg)), []).append(curve)
+    index = {
+        key: tuple(sorted(group, key=lambda curve: curve.code_block_size))
+        for key, group in grouped.items()
+    }
+    _CURVE_INDEX_CACHE[cache_key] = (curves, index)
+    return index
+
+
 def closest_curve(
     curves: dict[tuple[int, int, int], BlerCurve],
     mcs_index: int,
     base_graph: int,
     requested_cbs_bits: int,
 ) -> BlerCurve:
-    candidates = [
-        curve for (mcs, bg, _), curve in curves.items()
-        if mcs == mcs_index and bg == base_graph
-    ]
+    candidates = _curve_index(curves).get((int(mcs_index), int(base_graph)), ())
     if not candidates:
         raise ValueError(f"no sourced curve for MCS={mcs_index}, BG={base_graph}")
+    # Exact historical semantics: minimize absolute CBS error; on an equal
+    # distance choose the smaller sourced CBS.
     return min(candidates, key=lambda c: (abs(c.code_block_size - requested_cbs_bits), c.code_block_size))
 
 
