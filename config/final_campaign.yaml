@@ -1,0 +1,62 @@
+campaign_name: final_uav_sidelink_experimental_campaign
+classification: DERIVED_SYSTEM_LEVEL_EXPERIMENTAL_CAMPAIGN
+
+# STANDARD / LITERATURE / MEASUREMENT-GROUNDED anchors
+carrier_ghz: 3.5
+bandwidth_mhz: 50.0
+tx_power_baseline_dbm: 30.0
+altitude_baseline_m: 100.0
+resource_profile: thesis_profile_50mhz_30khz
+
+# EXPLICIT EXPERIMENTAL ASSUMPTIONS / SWEEPS
+noise_figure_baseline_db: 7.0
+fixed_area_xy_m: 1000.0
+reference_spatial_density_uavs_per_km2: 20.0
+reliability_target_bler: 0.10
+full_seeds: 100
+smoke_seeds: 3
+swarm_sizes: [5, 10, 20, 30, 50, 75, 100]
+geometry_types: [uniform, grid, circle, clustered, leader_follower]
+resource_counts: [1, 2, 4, 8]
+activity_probabilities: [0.10, 0.25, 0.50, 0.75, 1.00]
+directional_gain_db: [0.0, 3.0, 6.0, 9.0]
+noise_figure_db_sweep: [5.0, 7.0, 9.0]
+tx_power_dbm_sweep: [20.0, 25.0, 30.0]
+# Only used with the implemented 3GPP UMi-AV aerial branch (22.5 < h <= 300 m).
+altitude_m_sweep: [25.0, 50.0, 100.0, 150.0, 300.0]
+harq_attempts_sweep: [1, 2, 3, 4]
+harq_feedback_gap_slots: [1, 2, 4, 8]
+channel_models: [free_space, measured_a2a, tr38901_umi_av_los]
+
+# Traffic examples are EXPERIMENTAL_SWEEP profiles, not literature claims.
+traffic_profiles:
+  - {name: low, packet_size_bytes: 200, packet_rate_hz: 10.0}
+  - {name: medium, packet_size_bytes: 200, packet_rate_hz: 100.0}
+  - {name: high, packet_size_bytes: 200, packet_rate_hz: 1000.0}
+
+# Fixed-MCS comparison points. These are experimental comparator choices.
+fixed_mcs_comparison: [4, 6, 10]
+
+provenance:
+  carrier_ghz: MEASUREMENT_CAMPAIGN_CONFIGURATION_ERDEMIR_2023
+  bandwidth_mhz: MEASUREMENT_CAMPAIGN_CONFIGURATION_ERDEMIR_2023
+  tx_power_baseline_dbm: MEASUREMENT_CAMPAIGN_CONFIGURATION_ERDEMIR_2023
+  altitude_baseline_m: MEASUREMENT_CAMPAIGN_CONFIGURATION_ERDEMIR_2023
+  resource_profile: STANDARD_CONSTRAINED_PLUS_EXPERIMENTAL_CONFIGURATION
+  noise_figure_baseline_db: EXPERIMENTAL_ASSUMPTION
+  fixed_area_xy_m: SYNTHETIC
+  reference_spatial_density_uavs_per_km2: EXPERIMENTAL_CONFIGURATION
+  reliability_target_bler: EXPERIMENTAL_POLICY_TARGET
+  swarm_sizes: EXPERIMENTAL_SWEEP
+  geometry_types: SYNTHETIC
+  resource_counts: EXPERIMENTAL_SWEEP
+  activity_probabilities: EXPERIMENTAL_SWEEP
+  directional_gain_db: EXPERIMENTAL_SWEEP
+  noise_figure_db_sweep: EXPERIMENTAL_SWEEP
+  tx_power_dbm_sweep: EXPERIMENTAL_SWEEP
+  altitude_m_sweep: EXPERIMENTAL_SWEEP_WITHIN_3GPP_MODEL_VALIDITY
+  harq_attempts_sweep: EXPERIMENTAL_SWEEP
+  harq_feedback_gap_slots: EXPERIMENTAL_SWEEP
+  channel_models: MODEL_UNCERTAINTY_COMPARISON
+  traffic_profiles: EXPERIMENTAL_SWEEP
+  fixed_mcs_comparison: EXPERIMENTAL_COMPARATOR
