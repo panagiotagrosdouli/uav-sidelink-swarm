@@ -1,0 +1,36 @@
+name: final-campaign
+
+on:
+  push:
+    branches: ["run/final-campaign-2026-09-06"]
+
+jobs:
+  final-campaign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Prepare official 5G-LENA v5.0 BLER dataset
+        run: python -m tools.prepare_5glena_v5_bler
+      - name: Run full registered experimental campaign
+        run: python -m tools.run_thesis_pipeline
+      - name: Finalize canonical campaign
+        run: python -m tools.finalize_campaign
+      - name: Upload canonical final campaign
+        uses: actions/upload-artifact@v4
+        with:
+          name: uav-sidelink-final-campaign-${{ github.sha }}
+          path: |
+            data/generated/5glena_v5_table1_bler.csv
+            data/generated/5glena_v5_table1_bler_manifest.json
+            results/
+            figures/
+          if-no-files-found: error
+          retention-days: 90
