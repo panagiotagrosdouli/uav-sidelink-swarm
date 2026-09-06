@@ -3,21 +3,19 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 
-from src.mobility.amovfly import Trajectory, synchronize_pair
+from src.mobility.amovfly import Trajectory, load_ready_csv, synchronize_pair
 from src.mobility.geodesy import geodetic_to_ecef, geodetic_to_enu
 
 
 def _trajectory(name: str, offset: float = 0.0) -> Trajectory:
     return Trajectory(
         name,
-        pd.DataFrame(
-            {
-                "time_s": [0.0, 1.0, 2.0],
-                "x_m": [offset, offset + 1.0, offset + 2.0],
-                "y_m": [0.0, 0.0, 0.0],
-                "z_m": [10.0, 10.0, 10.0],
-            }
-        ),
+        pd.DataFrame({
+            "time_s": [0.0, 1.0, 2.0],
+            "x_m": [offset, offset + 1.0, offset + 2.0],
+            "y_m": [0.0, 0.0, 0.0],
+            "z_m": [10.0, 10.0, 10.0],
+        }),
     )
 
 
@@ -28,7 +26,7 @@ def test_synchronize_pair_distance():
     out = synchronize_pair(a, t0, b, t0, sample_period_s=1.0)
     assert np.allclose(out.a2a_distance_m, 3.0)
     assert set(out.classification) == {"DERIVED_FROM_MEASURED_DATASET"}
-    assert set(out.coordinate_source) == {"LOCAL_FRAME_ASSUMED_COMMON"}
+    assert set(out.coordinate_source) == {"LOCAL_XY_FRAME_ASSUMED_COMMON"}
 
 
 def test_takeoff_offset_reduces_overlap():
@@ -53,46 +51,35 @@ def test_wgs84_north_shift_is_about_111m_per_millidegree():
     assert abs(float(enu[0])) < 0.1
 
 
-def test_auto_mode_prefers_global_coordinates_over_incompatible_local_origins():
+def test_auto_mode_prefers_global_horizontal_over_incompatible_local_origins():
     t0 = datetime(2024, 1, 1, 12, 0, 0)
-    common_global = {
+    global_xy = {
         "latitude_deg": [40.0, 40.0, 40.0],
         "longitude_deg": [23.0, 23.0, 23.0],
-        "altitude_m": [100.0, 100.0, 100.0],
     }
-    a = Trajectory(
-        "A",
-        pd.DataFrame(
-            {
-                "time_s": [0.0, 1.0, 2.0],
-                "x_m": [0.0, 1.0, 2.0],
-                "y_m": [0.0, 0.0, 0.0],
-                "z_m": [0.0, 0.0, 0.0],
-                **common_global,
-            }
-        ),
-    )
-    b = Trajectory(
-        "B",
-        pd.DataFrame(
-            {
-                "time_s": [0.0, 1.0, 2.0],
-                "x_m": [1000.0, 1001.0, 1002.0],
-                "y_m": [0.0, 0.0, 0.0],
-                "z_m": [0.0, 0.0, 0.0],
-                **common_global,
-            }
-        ),
-    )
+    a = Trajectory("A", pd.DataFrame({
+        "time_s": [0.0, 1.0, 2.0], "x_m": [0.0, 1.0, 2.0],
+        "y_m": [0.0, 0.0, 0.0], "z_m": [10.0, 10.0, 10.0], **global_xy,
+    }))
+    b = Trajectory("B", pd.DataFrame({
+        "time_s": [0.0, 1.0, 2.0], "x_m": [1000.0, 1001.0, 1002.0],
+        "y_m": [0.0, 0.0, 0.0], "z_m": [10.0, 10.0, 10.0], **global_xy,
+    }))
     auto = synchronize_pair(a, t0, b, t0, sample_period_s=1.0)
-    local = synchronize_pair(
-        a,
-        t0,
-        b,
-        t0,
-        sample_period_s=1.0,
-        coordinate_mode="local_assumed_common",
-    )
+    local = synchronize_pair(a, t0, b, t0, sample_period_s=1.0, coordinate_mode="local_assumed_common")
     assert np.allclose(auto.a2a_distance_m, 0.0, atol=1e-6)
     assert np.allclose(local.a2a_distance_m, 1000.0)
-    assert set(auto.coordinate_source) == {"WGS84_ECEF_TO_COMMON_ENU"}
+    assert set(auto.coordinate_source) == {"WGS84_COMMON_HORIZONTAL_ENU_PLUS_MEASURED_AGL_Z"}
+
+
+def test_loader_accepts_public_ready_schema_real_lat_real_long(tmp_path):
+    path = tmp_path / "uav.csv"
+    pd.DataFrame({
+        "time": [0.0, 0.2], "gps_x": [0.0, 0.1], "gps_y": [0.0, 0.2],
+        "gps_z": [10.0, 10.1], "real_lat": [34.0, 34.000001],
+        "real_long": [108.0, 108.000001], "v_x": [1.0, 1.0],
+        "v_y": [0.0, 0.0], "v_z": [0.0, 0.0],
+    }).to_csv(path, index=False)
+    traj = load_ready_csv(path)
+    assert traj.has_global_horizontal_agl
+    assert {"latitude_deg", "longitude_deg", "z_m"}.issubset(traj.data.columns)
