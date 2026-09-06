@@ -1,6 +1,6 @@
 # Parameter provenance
 
-This project distinguishes **MEASURED**, **STANDARD**, **LITERATURE**, **DERIVED**, **EXPERIMENTAL_SWEEP**, **EXPERIMENTAL_ASSUMPTION**, and **SYNTHETIC** quantities. A value must not be described as a real measurement unless it was obtained directly from a published measurement campaign or measured dataset.
+This project distinguishes **MEASURED**, **MEASURED_DATASET**, **STANDARD**, **LITERATURE**, **DERIVED**, **EXPERIMENTAL_SWEEP**, **EXPERIMENTAL_ASSUMPTION**, and **SYNTHETIC** quantities. A value must not be described as a real measurement unless it was obtained directly from a published measurement campaign or measured dataset.
 
 ## Measurement-based A2A baseline at 3.5 GHz
 
@@ -54,6 +54,21 @@ The current implementation intentionally supports only an auditable equal-height
 
 The implementation is a **large-scale model only**. It does not yet implement the Annex-B fast-fading channel impulse response.
 
+## Real mobility provenance — AMOVFLY
+
+External source: `YujiaoHu/AMOVFLY-Dataset`.
+
+The dataset repository reports 270+ flights, more than 46 hours of telemetry, three UAVs, and simultaneous multi-UAV flight pairs. Ready-data files include time, local x/y/z position, geographic coordinates, velocity, wind and energy telemetry.
+
+| Quantity | Type | Notes |
+|---|---|---|
+| Original AMOVFLY telemetry rows | MEASURED_DATASET | Real flight data from the external dataset |
+| Time synchronization/interpolation | DERIVED_FROM_MEASURED_DATASET | Created by this project |
+| A2A distance after validated common-frame transform | DERIVED_FROM_MEASURED_DATASET | Not raw measurement |
+| RF path loss / received power applied to AMOVFLY trajectories | SIMULATION_USING_MEASUREMENT_DERIVED_CHANNEL | Not RF measurements |
+
+No top-level AMOVFLY `LICENSE` file was found during GitHub repository inspection; therefore this project does not vendor/redistribute the flight CSV files. A common-coordinate-frame check is mandatory before final A2A distance interpretation.
+
 ## Density-study provenance
 
 | Quantity | Value | Type | Rationale |
@@ -70,6 +85,15 @@ The implementation is a **large-scale model only**. It does not yet implement th
 | Receiver noise figure | 7 dB | EXPERIMENTAL_ASSUMPTION | Not reported by Erdemir et al.; must be sensitivity-tested |
 | SINR threshold | 5 dB | EXPERIMENTAL_ASSUMPTION | Preliminary link-success proxy, not NR BLER |
 
+## Resource allocation, routing and beamforming provenance
+
+- Random resource allocation: `EXPERIMENTAL_BASELINE`.
+- Greedy distance/interference-aware allocation: `THIS_WORK / EXPERIMENTAL_ALGORITHM`; **not** a normative NR Mode-2 implementation.
+- Resource counts used in sweeps: `EXPERIMENTAL_SWEEP`.
+- Graph-based minimum-hop / quality-aware routing: `THIS_WORK / SYSTEM_LEVEL_ABSTRACTION`.
+- Directional gain values 0/3/6/9 dB: `EXPERIMENTAL_SWEEP`; not measured antenna gains.
+- 3GPP TS 38.214 V19.4.0 and TS 38.213 V19.4.0: `STANDARD` background for sidelink procedures, not a claim that the experimental allocator implements all normative procedures.
+
 ## Values intentionally NOT called measured
 
 The following are not measurements from the Erdemir et al. campaign:
@@ -79,7 +103,9 @@ The following are not measurements from the Erdemir et al. campaign:
 - disjoint-pair topology and simultaneous resource reuse;
 - receiver noise figure;
 - SINR decoding threshold;
-- scheduler/resource-pool configuration;
+- experimental resource allocation;
+- graph routing outputs;
+- beamforming gain sweeps;
 - packet delivery ratio inferred from a threshold;
 - Shannon `B log2(1+SINR)` values.
 
@@ -93,6 +119,9 @@ These must remain labelled as experimental, synthetic, or derived quantities.
 - 3GPP TR 38.901 current cited version: **V19.4.0 Release 19, July 2026**.
 - 3GPP aerial-to-aerial Case 9 model selection: **VERIFIED from Clause 7.9.3 / Tables 7.9.3-1 and 7.9.3-5**.
 - TR 36.777 UMi-AV LOS/NLOS and shadow-fading equations: **IMPLEMENTED as an explicitly limited subset**.
+- TS 38.214 / TS 38.213 current cited versions: **V19.4.0 Release 19**.
+- AMOVFLY telemetry schema and multi-UAV metadata: **INSPECTED from the source repository**.
 - Exact raw Erdemir IQ/flight-log samples: **NOT present in this repository**.
 - Full 3GPP fast fading: **NOT IMPLEMENTED**.
-- Bit-accurate NR sidelink PHY/MAC/BLER: **NOT IMPLEMENTED**.
+- Bit-accurate NR sidelink PHY/MAC/BLER/HARQ: **NOT IMPLEMENTED**.
+- Full array/MIMO beam management: **NOT IMPLEMENTED**.
