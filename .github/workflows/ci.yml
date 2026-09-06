@@ -25,12 +25,16 @@ jobs:
         run: python -m simulations.channel_comparison
       - name: Smoke-test density study
         run: python -m simulations.density_measurement_based
+      - name: Smoke-test scaling geometry and activity
+        run: python -m simulations.scaling_geometry_activity_study --smoke
       - name: Smoke-test resource allocation
         run: python -m simulations.resource_allocation_study
       - name: Smoke-test routing
-        run: python -m simulations.routing_study
-      - name: Smoke-test beamforming sensitivity
-        run: python -m simulations.beamforming_sensitivity
+        run: python -m simulations.routing_study --smoke
+      - name: Smoke-test directionality sensitivity
+        run: python -m simulations.beamforming_sensitivity --smoke
+      - name: Smoke-test robustness sensitivity
+        run: python -m simulations.robustness_sensitivity --smoke
       - name: Smoke-test NR MCS/BLER link performance
         run: python -m simulations.nr_link_performance_study
       - name: Smoke-test TBS/CBS/HARQ latency study
@@ -38,7 +42,7 @@ jobs:
       - name: Smoke-test sidelink overhead sensitivity
         run: python -m simulations.sidelink_overhead_sensitivity
       - name: Validate reproducible thesis registry
-        run: python -m tools.run_thesis_pipeline --dry-run
+        run: python -m tools.run_thesis_pipeline --dry-run --smoke
       - name: Upload scientific outputs
         uses: actions/upload-artifact@v4
         with:
