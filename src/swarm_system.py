@@ -15,6 +15,7 @@ import pandas as pd
 from src.channel_models.free_space import path_loss_db as fspl_path_loss_db
 from src.channel_models.measured_a2a import path_loss_db as measured_a2a_path_loss_db
 from src.channel_models.tr38901_a2a import umi_av_los_path_loss_db
+from src.mobility.synthetic import GeometryName, generate_positions
 
 K_B = 1.380649e-23
 T0_K = 290.0
@@ -40,6 +41,7 @@ class SwarmConfig:
     n_uavs: int
     seed: int
     channel: ChannelName = "measured_a2a"
+    geometry: GeometryName = "uniform"
     area_xy_m: float = 1000.0
     altitude_m: float = 100.0
     carrier_ghz: float = 3.5
@@ -51,9 +53,13 @@ class SwarmConfig:
 
 
 def generate_equal_altitude_positions(cfg: SwarmConfig, rng: np.random.Generator) -> np.ndarray:
-    xy = rng.uniform(0.0, cfg.area_xy_m, size=(cfg.n_uavs, 2))
-    z = np.full((cfg.n_uavs, 1), cfg.altitude_m)
-    return np.hstack([xy, z])
+    return generate_positions(
+        cfg.n_uavs,
+        cfg.area_xy_m,
+        cfg.altitude_m,
+        rng,
+        geometry=cfg.geometry,
+    )
 
 
 def path_loss_for_link(distance_m: float, cfg: SwarmConfig) -> float:
@@ -76,18 +82,15 @@ def received_power_w(tx: int, rx: int, positions: np.ndarray, cfg: SwarmConfig) 
 
 
 def build_disjoint_pairs(n_uavs: int) -> list[tuple[int, int]]:
-    """Return half-duplex-compatible disjoint Tx->Rx pairs.
-
-    UAVs are paired as (0->1), (2->3), ... . For odd N, the last UAV is idle in
-    that snapshot. This prevents a receiver from simultaneously transmitting on
-    the same resource and avoids artificial self-interference.
-    """
+    """Return half-duplex-compatible disjoint Tx->Rx pairs."""
     return [(i, i + 1) for i in range(0, n_uavs - 1, 2)]
 
 
 def simulate_snapshot(cfg: SwarmConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
     if cfg.n_uavs < 2:
         raise ValueError("n_uavs must be at least 2")
+    if not 0.0 <= cfg.activity_probability <= 1.0:
+        raise ValueError("activity_probability must lie in [0,1]")
     rng = np.random.default_rng(cfg.seed)
     pos = generate_equal_altitude_positions(cfg, rng)
     noise_dbm = thermal_noise_dbm(cfg.bandwidth_mhz * 1e6, cfg.noise_figure_db)
@@ -96,6 +99,8 @@ def simulate_snapshot(cfg: SwarmConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
     desired = build_disjoint_pairs(cfg.n_uavs)
     active = rng.random(len(desired)) < cfg.activity_probability
     if len(desired) and not np.any(active):
+        # Keep a non-empty snapshot for numerical studies while retaining the
+        # configured Bernoulli activity model for all other links.
         active[rng.integers(0, len(desired))] = True
 
     rows: list[dict[str, float | int | bool | str]] = []
@@ -103,22 +108,27 @@ def simulate_snapshot(cfg: SwarmConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
         if not active[link_id]:
             continue
         signal_w, d_m, pl_db = received_power_w(tx, rx, pos, cfg)
-        interference_w = 0.0
-        n_interferers = 0
+        interferer_powers: list[float] = []
         for other_id, (other_tx, _) in enumerate(desired):
             if other_id == link_id or not active[other_id]:
                 continue
             p_i_w, _, _ = received_power_w(other_tx, rx, pos, cfg)
-            interference_w += p_i_w
-            n_interferers += 1
+            interferer_powers.append(p_i_w)
 
+        interference_w = float(np.sum(interferer_powers)) if interferer_powers else 0.0
+        strongest_interferer_w = max(interferer_powers, default=0.0)
+        n_interferers = len(interferer_powers)
         sir_linear = signal_w / interference_w if interference_w > 0 else np.inf
         sinr_linear = signal_w / (interference_w + noise_w)
         sinr_db = 10.0 * np.log10(sinr_linear)
+        dominant_fraction = strongest_interferer_w / interference_w if interference_w > 0 else 0.0
+        interference_to_noise = interference_w / noise_w if noise_w > 0 else np.inf
         rows.append({
             "channel": cfg.channel,
+            "geometry": cfg.geometry,
             "seed": cfg.seed,
             "n_uavs": cfg.n_uavs,
+            "activity_probability": cfg.activity_probability,
             "link_id": link_id,
             "tx": tx,
             "rx": rx,
@@ -126,6 +136,9 @@ def simulate_snapshot(cfg: SwarmConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
             "path_loss_db": pl_db,
             "rx_power_dbm": float(w_to_dbm(signal_w)),
             "interference_dbm": float(w_to_dbm(interference_w)) if interference_w > 0 else -np.inf,
+            "strongest_interferer_dbm": float(w_to_dbm(strongest_interferer_w)) if strongest_interferer_w > 0 else -np.inf,
+            "dominant_interferer_fraction": dominant_fraction,
+            "interference_to_noise_linear": interference_to_noise,
             "noise_dbm": noise_dbm,
             "n_interferers": n_interferers,
             "sir_db": 10.0 * np.log10(sir_linear) if np.isfinite(sir_linear) else np.inf,
@@ -137,4 +150,6 @@ def simulate_snapshot(cfg: SwarmConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
 
     positions = pd.DataFrame(pos, columns=["x_m", "y_m", "z_m"])
     positions.insert(0, "uav_id", np.arange(cfg.n_uavs))
+    positions["geometry"] = cfg.geometry
+    positions["classification"] = "SYNTHETIC"
     return positions, pd.DataFrame(rows)
