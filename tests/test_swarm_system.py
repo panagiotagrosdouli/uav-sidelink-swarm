@@ -3,6 +3,7 @@ import numpy as np
 from src.swarm_system import (
     SwarmConfig,
     build_disjoint_pairs,
+    build_nearest_disjoint_pairs,
     dbm_to_w,
     simulate_snapshot,
     thermal_noise_dbm,
@@ -18,6 +19,29 @@ def test_disjoint_pairs_are_half_duplex():
     assert pairs == [(0, 1), (2, 3), (4, 5)]
     nodes = [x for pair in pairs for x in pair]
     assert len(nodes) == len(set(nodes))
+
+
+def test_nearest_disjoint_pairs_are_local_and_half_duplex():
+    positions = np.array([
+        [0.0, 0.0, 100.0],
+        [1.0, 0.0, 100.0],
+        [100.0, 0.0, 100.0],
+        [102.0, 0.0, 100.0],
+        [300.0, 0.0, 100.0],
+    ])
+    pairs = build_nearest_disjoint_pairs(positions)
+    assert pairs == [(0, 1), (2, 3)]
+    nodes = [node for pair in pairs for node in pair]
+    assert len(nodes) == len(set(nodes))
+
+
+def test_nearest_pairing_snapshot_is_reproducible():
+    cfg = SwarmConfig(n_uavs=20, seed=7, pairing="nearest_neighbor", activity_probability=1.0)
+    p1, l1 = simulate_snapshot(cfg)
+    p2, l2 = simulate_snapshot(cfg)
+    assert p1.equals(p2)
+    assert l1.equals(l2)
+    assert set(l1.pairing) == {"nearest_neighbor"}
 
 
 def test_snapshot_has_no_receiver_as_simultaneous_transmitter():

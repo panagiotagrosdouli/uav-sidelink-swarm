@@ -21,6 +21,7 @@ K_B = 1.380649e-23
 T0_K = 290.0
 
 ChannelName = Literal["measured_a2a", "free_space", "tr38901_umi_av_los"]
+PairingName = Literal["sequential", "nearest_neighbor"]
 
 
 def dbm_to_w(dbm: float | np.ndarray) -> np.ndarray:
@@ -42,6 +43,7 @@ class SwarmConfig:
     seed: int
     channel: ChannelName = "measured_a2a"
     geometry: GeometryName = "uniform"
+    pairing: PairingName = "sequential"
     area_xy_m: float = 1000.0
     altitude_m: float = 100.0
     carrier_ghz: float = 3.5
@@ -82,8 +84,47 @@ def received_power_w(tx: int, rx: int, positions: np.ndarray, cfg: SwarmConfig) 
 
 
 def build_disjoint_pairs(n_uavs: int) -> list[tuple[int, int]]:
-    """Return half-duplex-compatible disjoint Tx->Rx pairs."""
+    """Return deterministic index-based half-duplex-compatible disjoint pairs."""
     return [(i, i + 1) for i in range(0, n_uavs - 1, 2)]
+
+
+def build_nearest_disjoint_pairs(positions: np.ndarray) -> list[tuple[int, int]]:
+    """Greedily form deterministic short-range disjoint pairs from geometry.
+
+    All pairwise distances are sorted from shortest to longest and an edge is
+    selected when neither endpoint has already been used. The result is a
+    THIS_WORK topology abstraction, not a 3GPP pairing procedure. It is useful
+    for spatial-density scaling because desired-link length then tracks local
+    neighbor spacing instead of the total simulated area.
+    """
+    pos = np.asarray(positions, dtype=float)
+    if pos.ndim != 2 or pos.shape[1] != 3:
+        raise ValueError("positions must have shape (N, 3)")
+    n = len(pos)
+    edges: list[tuple[float, int, int]] = []
+    for i in range(n):
+        for j in range(i + 1, n):
+            edges.append((float(np.linalg.norm(pos[i] - pos[j])), i, j))
+    edges.sort(key=lambda item: (item[0], item[1], item[2]))
+    used: set[int] = set()
+    pairs: list[tuple[int, int]] = []
+    for _, i, j in edges:
+        if i in used or j in used:
+            continue
+        pairs.append((i, j))
+        used.add(i)
+        used.add(j)
+        if len(used) >= n - (n % 2):
+            break
+    return pairs
+
+
+def _pairs_for_snapshot(cfg: SwarmConfig, positions: np.ndarray) -> list[tuple[int, int]]:
+    if cfg.pairing == "sequential":
+        return build_disjoint_pairs(cfg.n_uavs)
+    if cfg.pairing == "nearest_neighbor":
+        return build_nearest_disjoint_pairs(positions)
+    raise ValueError(f"unknown pairing {cfg.pairing}")
 
 
 def simulate_snapshot(cfg: SwarmConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -96,11 +137,9 @@ def simulate_snapshot(cfg: SwarmConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
     noise_dbm = thermal_noise_dbm(cfg.bandwidth_mhz * 1e6, cfg.noise_figure_db)
     noise_w = float(dbm_to_w(noise_dbm))
 
-    desired = build_disjoint_pairs(cfg.n_uavs)
+    desired = _pairs_for_snapshot(cfg, pos)
     active = rng.random(len(desired)) < cfg.activity_probability
     if len(desired) and not np.any(active):
-        # Keep a non-empty snapshot for numerical studies while retaining the
-        # configured Bernoulli activity model for all other links.
         active[rng.integers(0, len(desired))] = True
 
     rows: list[dict[str, float | int | bool | str]] = []
@@ -126,6 +165,7 @@ def simulate_snapshot(cfg: SwarmConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
         rows.append({
             "channel": cfg.channel,
             "geometry": cfg.geometry,
+            "pairing": cfg.pairing,
             "seed": cfg.seed,
             "n_uavs": cfg.n_uavs,
             "activity_probability": cfg.activity_probability,
@@ -151,5 +191,6 @@ def simulate_snapshot(cfg: SwarmConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
     positions = pd.DataFrame(pos, columns=["x_m", "y_m", "z_m"])
     positions.insert(0, "uav_id", np.arange(cfg.n_uavs))
     positions["geometry"] = cfg.geometry
+    positions["pairing"] = cfg.pairing
     positions["classification"] = "SYNTHETIC"
     return positions, pd.DataFrame(rows)
