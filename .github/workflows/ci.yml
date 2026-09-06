@@ -2,7 +2,7 @@ name: scientific-ci
 
 on:
   push:
-    branches: [main, "feature/**"]
+    branches: [main, "feature/**", "paper/**"]
   pull_request:
 
 jobs:
@@ -53,10 +53,12 @@ jobs:
         run: python -m simulations.synthetic_mobility_study --smoke
       - name: Smoke-test ablation
         run: python -m simulations.ablation_study --smoke
+      - name: Smoke-test paper operating envelope
+        run: python -m simulations.paper_operating_envelope --smoke
       - name: Validate reproducible thesis registry
         run: python -m tools.run_thesis_pipeline --dry-run --smoke
       - name: Validate final campaign config/finalizer syntax
-        run: python -m py_compile tools/finalize_campaign.py tools/prepare_5glena_v5_bler.py src/sidelink/adaptive_tb.py
+        run: python -m py_compile tools/finalize_campaign.py tools/prepare_5glena_v5_bler.py src/sidelink/adaptive_tb.py simulations/paper_operating_envelope.py
       - name: Upload scientific outputs
         uses: actions/upload-artifact@v4
         with:
