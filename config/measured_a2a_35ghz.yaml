@@ -1,0 +1,38 @@
+scenario:
+  name: erdemir_2023_a2a_measurement_reproduction
+  type: measurement_based_reproduction
+  environment: rural_like_hilly_forested_campus
+  tx_uav: DJI Matrice 600 Pro
+  rx_uav: DJI Matrice 600 Pro
+  altitude_m: 100
+  initial_separation_m: 85
+  tx_trajectory_length_m: 1000
+  tx_speed_mps: 3
+  measurement_period_ms: 100
+  approximate_experiment_duration_min: 6
+
+radio:
+  center_frequency_ghz: 3.5
+  bandwidth_mhz: 50
+  transmitted_power_dbm: 30
+  pn_sequence_length: 4095
+  delay_resolution_ns: 20
+  maximum_delay_us: 160
+
+channel:
+  model: measured_log_distance_a2a
+  reference_distance_m: 1
+  path_loss_exponent: 2.166
+  pl0_db: 34.650
+  equation: "PL(d) = PL0 + 10*n*log10(d/d0)"
+
+provenance:
+  classification: measured_published
+  source_title: "Measurement-based Channel Characterization for A2A and A2G Wireless Drone Communication Systems"
+  authors: "Ubeydullah Erdemir, Batuhan Kaplan, Ibrahim Hokelek, Ali Gorcin, Hakan Ali Cirpan"
+  year: 2023
+  arxiv: "2306.08474"
+  notes:
+    - "Values above are reported by the field measurement campaign in the cited paper."
+    - "The fitted path-loss parameters are measurement-derived for the A2A scenario."
+    - "This file does not invent a receiver noise figure, SINR threshold, traffic load, or swarm density."
