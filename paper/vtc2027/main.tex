@@ -1,0 +1,106 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath,booktabs}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{url}
+
+\title{Interference Scaling and Operating-Envelope Mitigation in 5G NR Sidelink UAV Swarms}
+\author{\IEEEauthorblockN{Anonymous Author(s)}\\\IEEEauthorblockA{Submission draft for IEEE VTC2027-Spring}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Direct NR sidelink is attractive for infrastructure-independent communication inside unmanned aerial vehicle (UAV) swarms, but dense line-of-sight deployments can become strongly interference-limited. We quantify how swarm density, exact frequency-resource partitioning, and directional spatial selectivity jointly determine an evaluated reliability/goodput operating region. The system model combines a published 3.5-GHz air-to-air path-loss fit, NR MCS/TBS/LDPC mechanics, and SINR-to-BLER curves processed from the official 5G-LENA v5.0 link-level dataset. A 100-seed campaign evaluates 5--100 UAVs, exact partitions of a 133-PRB, 50-MHz/30-kHz profile into 1, 2, 4, or 8 resources, and an experimental 0--9-dB desired/interferer directional relative advantage. At 100 UAVs, the shared-resource baseline yields 0.0128 first-transmission success and 0.359 Mbps expected PHY goodput; eight resources yield 0.2049 and 1.042 Mbps despite reduced per-link bandwidth. Combining eight resources with 6 dB directional advantage yields 0.5292 and 2.229 Mbps. Under an explicit engineering policy of success $\geq0.10$ and goodput $\geq1$ Mbps, the largest evaluated feasible swarm size moves from 10 UAVs in the baseline to the 100-UAV evaluation boundary for several mitigation settings.
+\end{abstract}
+
+\begin{IEEEkeywords}
+5G NR sidelink, UAV swarm, interference, resource allocation, aerial communications, operating envelope.
+\end{IEEEkeywords}
+
+\section{Introduction}
+UAV swarms require frequent local exchange of position, status, control, and coordination information. NR sidelink provides a standardized direct-transmission framework and is therefore a candidate for infrastructure-independent intra-swarm communication. Aerial line-of-sight propagation, however, strengthens desired and interfering links simultaneously. As swarm density grows, a shared resource can transition from sparse interference to aggregate-interference domination.
+
+Prior UAV-sidelink work has established the relevance of sidelink and multi-hop networking to cooperative swarms \cite{mishra2022cu2x,mishra2021multihop,varonen2024}, while analytical U2U work has characterized outage behavior in multi-UAV networks \cite{lau2023outage}. Joint trajectory, frequency, and routing optimization has also been considered \cite{alam2024joint}. Our objective is different: rather than propose a new optimizer, we isolate and quantify the density-dependent trade-off among interference isolation, the bandwidth/TBS cost of exact resource partitioning, and directional spatial selectivity.
+
+The contributions are threefold: (i) a measurement-grounded, NR-aware system evaluation combining a published 3.5-GHz A2A path-loss fit with NR transport-block mechanics and sourced 5G-LENA v5.0 BLER curves; (ii) a characterization of the interference-regime transition from 5 to 100 UAVs; and (iii) an exact-resource operating envelope in which occupied bandwidth, noise, TBS, LDPC segmentation, requested code-block size, and BLER mapping are recomputed for every resource partition before directional sensitivity is applied. We do not claim a bit-accurate sidelink PHY, normative Mode-1/Mode-2 scheduling, measured swarm RF performance, or full MIMO/beam management.
+
+\section{System Model and Evidence}
+\subsection{Propagation and NR abstraction}
+The large-scale A2A model uses the fit reported from a 3.5-GHz UAV measurement campaign \cite{erdemir2023a2a}:
+\begin{equation}
+PL(d)=34.650+10(2.166)\log_{10}(d/1\,\mathrm{m})\;\mathrm{dB}.
+\end{equation}
+The coefficients are measurement-derived fitted parameters; RF values at simulated distances are model-derived, not field measurements. The evaluated NR profile uses 50 MHz, 30-kHz SCS, 133 PRBs, and 0.5-ms slots. MCS Table-1 parameters, TBS quantization, LDPC base-graph selection, and code-block segmentation follow the implemented Release-19 rules. The selected control/data/DM-RS/guard overhead is an explicit study configuration.
+
+For each candidate MCS, computed TBS determines LDPC base graph and nominal code-block size. The request is mapped to the closest sourced curve for the same MCS/base graph. The canonical campaign processes the official CTTC 5G-LENA v5.0 Table-1 source (1,332 curves, BG1/BG2, MCS 0--28) \cite{patriciello2019simulator,cttc5glena}. These curves are link-level simulation evidence, not UAV measurements or 3GPP BLER tables.
+
+\subsection{Exact resource and directional model}
+The 133 PRBs are partitioned as $R=1$: 133; $R=2$: 67+66; $R=4$: 34+33+33+33; and $R=8$: 17+17+17+17+17+16+16+16. Links on different abstract frequency resources do not interfere. Crucially, occupied noise bandwidth, TBS, LDPC segmentation, requested CBS, and BLER mapping are recomputed for the assigned partition, so interference removal is not free. A conflict-graph heuristic assigns resources; it is a system-level abstraction developed in this work, not normative sidelink Mode 1/2.
+
+Directional relative advantage $G\in\{0,3,6,9\}$ dB is implemented as $+G/2$ on desired received power and $-G/2$ on co-channel interference. It is an experimental sensitivity variable, not a measured antenna gain or full MIMO model.
+
+\subsection{Campaign and operating envelope}
+We evaluate $N\in\{5,10,20,30,50,75,100\}$ UAVs with 100 deterministic matched seeds per $(N,R,G)$ point, yielding 11,200 per-seed realizations and 112 scenario summaries. Principal metrics are mean SINR, first-transmission success derived from TB BLER, and expected delivered PHY goodput per link. For interpretation we also decompose policy-failed links into dominant- and aggregate-interference regimes.
+
+A scenario is feasible under the explicit engineering policy
+\begin{equation}
+\bar p_{\rm 1st}\geq0.10,\qquad \bar T_{\rm goodput}\geq1\;\mathrm{Mbps}.
+\end{equation}
+The reported envelope is the largest \emph{evaluated} $N$ satisfying both constraints, not a universal capacity limit.
+
+\section{Results}
+\subsection{Density scaling and interference regime}
+With $R=1,G=0$, mean SINR falls from $-0.49$ dB at $N=5$ to $-23.03$ dB at $N=100$. At $N=100$, first-transmission success is 0.0128 and expected PHY goodput is 0.359 Mbps. Approximately 72.4\% of policy-failed links are classified as aggregate-interference dominated versus 27.6\% dominant-interferer failures. Thus the dense shared-resource regime is primarily a many-interferer problem.
+
+\subsection{Resource isolation has a bandwidth cost}
+Table~\ref{tab:n100} shows the key $N=100,G=0$ result. Increasing $R$ always improves mean SINR in these points, but goodput is non-monotonic: $R=4$ has better SINR and first-TX success than $R=2$, yet lower goodput (0.572 versus 0.668 Mbps). More orthogonality reduces co-channel interference while simultaneously reducing PRBs and TBS. This exact accounting prevents the trivial conclusion that more orthogonal resources always increase throughput.
+
+\begin{table}[t]
+\caption{$N=100$, no directional advantage.}
+\label{tab:n100}
+\centering
+\begin{tabular}{rrrr}
+\toprule
+$R$ & SINR (dB) & First-TX success & Goodput (Mbps)\\
+\midrule
+1 & -23.03 & 0.0128 & 0.359\\
+2 & -16.20 & 0.0749 & 0.668\\
+4 & -10.48 & 0.0775 & 0.572\\
+8 &  -5.47 & 0.2049 & 1.042\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Joint resource isolation and spatial selectivity}
+Directionality alone does not satisfy the joint policy at the densest shared-resource point: at $N=100,R=1,G=9$, goodput reaches 1.435 Mbps but first-TX success is only 0.0494. In contrast, $R=8,G=6$ yields 0.53-dB mean SINR, 0.5292 first-TX success, and 2.229 Mbps expected goodput. Relative to the matched-seed $R=1,G=0$ baseline, first-TX success increases by 0.516358 (95\% CI [0.505829, 0.526887], Cohen's $d_z=9.61$, $n=100$), while expected goodput increases by 1.870079 Mbps (95\% CI [1.728555, 2.011603], $d_z=2.59$, $n=100$).
+
+\begin{table}[t]
+\caption{Largest evaluated feasible $N$ under first-TX success $\geq0.10$ and goodput $\geq1$ Mbps.}
+\label{tab:envelope}
+\centering
+\begin{tabular}{r|rrrr}
+\toprule
+$R$ & $G=0$ & $G=3$ & $G=6$ & $G=9$\\
+\midrule
+1 & 10 & 10 & 20 & 50\\
+2 & 50 & 75 & 100 & 100\\
+4 & 50 & 75 & 100 & 100\\
+8 & 100 & 100 & 100 & 100\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:envelope} summarizes the evaluated operating envelope. The baseline reaches only $N=10$ under the joint policy, whereas $R=8,G=0$ reaches the 100-UAV boundary without directional advantage; moderate $R=2,G=6$ also reaches that boundary. The table must not be read as universal support for 100 UAVs: the evaluation grid itself ends at $N=100$. Instead, it quantifies how interference mitigation shifts the feasible region within the evaluated design space.
+
+\section{Discussion and Limitations}
+The central design implication is that interference should be reduced before relying on retransmission. Exact resource partitioning exposes a genuine isolation-versus-bandwidth trade-off, while directional selectivity acts on residual co-channel interference. Their combination is therefore complementary rather than interchangeable. The result motivates schedulers that adapt reuse to local interference conditions and then exploit spatial selectivity, but this work does not claim such a standards-complete scheduler.
+
+No measured multi-UAV RF interference, BLER, PDR, or end-to-end latency is reported. The A2A law is measurement-derived, whereas simulated geometries and RF outcomes are model-derived. The BLER curves are 5G-LENA link-level simulation evidence. The conflict-graph allocator is not normative Mode 1/2. $G$ is not a full antenna/MIMO/beam-tracking model. Full fast fading is not modeled, and TB BLER derived from code-block BLER assumes independent code-block decoding events. Finally, the envelope thresholds are engineering-policy choices, not 3GPP requirements.
+
+\section{Conclusion}
+Dense shared-resource NR sidelink UAV swarms become severely aggregate-interference limited in the evaluated system model. Exact frequency-resource separation can restore reliability, but its benefit is constrained by the simultaneous loss of per-link bandwidth and TBS. Directional relative advantage alone is insufficient at the densest shared-resource point, whereas joint resource isolation and spatial selectivity substantially expand the evaluated reliability/goodput operating envelope. The main system insight is therefore not that orthogonalization or directionality is universally beneficial, but that dense aerial sidelink requires balancing interference suppression against the NR payload cost of resource partitioning.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

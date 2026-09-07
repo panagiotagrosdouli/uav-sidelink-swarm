@@ -33,12 +33,12 @@ Checked: 2026-09-07.
 
 ## Required editorial work before upload
 
-- Convert `MANUSCRIPT_SUBMISSION.md` into the selected IEEE conference template.
-- Reduce related work to the closest 4–6 papers.
-- Replace Markdown tables with compact IEEE tables/figures.
+- Compile and page-count `paper/vtc2027/main.tex` using the IEEE conference template.
+- Keep related work to the closest 4–6 papers.
+- Use compact IEEE tables/figures.
 - Ensure every quantitative claim maps to frozen run #3 evidence.
 - Add figure captions that state metric classification and scenario assumptions where necessary.
 - Verify final reference metadata against publisher/DOI records.
-- Run a final claim audit against `docs/experiments/012_publication_evidence.md` and `paper/CLAIM_GUARDRAILS.md`.
+- Run a final claim audit against `docs/experiments/012_publication_evidence.md` and `paper/CLAIM_CHECK.md`.
 
 The selected venue does not change the scientific result. It only determines manuscript length, formatting, and the amount of supporting material that can remain in the main paper.
