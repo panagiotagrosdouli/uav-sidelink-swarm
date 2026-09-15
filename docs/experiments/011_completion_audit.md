@@ -1,4 +1,8 @@
-# Experimental completion audit
+# Experimental completion audit — HISTORICAL / SUPERSEDED
+
+> **Superseded by:** `docs/FINAL_READINESS.md` and the canonical final-thesis campaign on `main` (scientific commit `fcae537ef0846b94c0c73ce306e15c406ab542f7`, workflow run #5, successful).
+>
+> This file is retained as the original engineering completion log. Its `Missing work` column describes the state before the subsequent completion work and must not be used as the current project status.
 
 This audit follows the master experimental program and records what is already present on `main`, what is validated, and what still needs completion. It is an engineering/research log, not thesis prose.
 
@@ -40,3 +44,7 @@ This audit follows the master experimental program and records what is already p
 3. fairness, geometry, activity and fixed-density scaling;
 4. interaction/ablation experiments;
 5. final canonical campaign, figures, tables and key findings.
+
+## Historical status note
+
+The priorities above were subsequently addressed at the canonical final-thesis campaign level. See `docs/FINAL_READINESS.md` for the current status.
