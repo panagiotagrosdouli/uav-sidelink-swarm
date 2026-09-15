@@ -1,4 +1,6 @@
-# 012 — Canonical publication evidence freeze
+# 012 — Canonical publication evidence freeze — HISTORICAL / SUPERSEDED
+
+> **Current canonical status:** the repository README and `docs/FINAL_READINESS.md` now identify final-thesis-campaign run **#5** on scientific commit `fcae537ef0846b94c0c73ce306e15c406ab542f7` as the current canonical thesis evidence state. This file remains valuable as the earlier publication evidence freeze and is retained for provenance.
 
 This file freezes the first publication-ready NR Sidelink UAV swarm operating-envelope campaign that includes the matched-seed statistical synthesis. It is evidence metadata only; it does not redefine the scientific model.
 
