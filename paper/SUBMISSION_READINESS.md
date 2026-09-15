@@ -1,65 +1,59 @@
 # Submission readiness audit
 
-This checklist is tied to the canonical publication evidence frozen in `docs/experiments/012_publication_evidence.md` and is intended to prevent manuscript claims from drifting away from the successful artifact.
+This checklist is tied to the current canonical thesis evidence and prevents manuscript claims from drifting away from the successful final campaign.
 
 ## Canonical evidence
 
-- Scientific SHA: `9fb112307270d9d39408e704f285ea91d20a735b`
-- Workflow: `paper-operating-envelope`, run #3, ID `34085307799`
-- Artifact ID: `10005074790`
-- Artifact digest: `sha256:4a996afe9dffa7984a5a0cfa6276a6f727228cd1ee2cbbd6e7f1634e8c149137`
-- 100 matched seeds per scenario
-- 11,200 per-seed realizations
-- 112 scenario summaries
-- 84 matched-seed comparisons
-- 16 operating-envelope points
-- 0 missing values in audited publication tables
-- BLER mode: `FULL_5GLENA_V5_LOCAL`
+- Canonical scientific commit: `fcae537ef0846b94c0c73ce306e15c406ab542f7`
+- Final-thesis-campaign: run #5
+- Workflow conclusion: `success`
+- Registered experiments: `18/18 successful`
+- Canonical figures: `17/17 present`
+- Scientific audit checks: `304`
+- Scientific audit failures: `0`
+- Missing external/optional evidence: `0`
+- Main full-campaign Monte-Carlo studies: `100 deterministic seeds`
 
-## Headline result that may be quoted
+Historical publication runs remain preserved for provenance but are not authoritative for current readiness.
 
-At `N=100`, comparing the mitigated `R=8, G=6 dB` configuration with the `R=1, G=0 dB` baseline:
+## Headline evidence
+
+At `N=100`, the canonical publication evidence reports the baseline `R=1, G=0 dB` and mitigated `R=8, G=6 dB` cases as:
 
 - mean SINR: `-23.03 -> 0.53 dB`;
-- mean first-TX success: `0.013 -> 0.529`;
+- mean first-transmission success: `0.013 -> 0.529`;
 - mean expected PHY goodput: `0.359 -> 2.229 Mbps`.
 
-Matched-seed effect sizes:
+The matched-seed comparison over 100 deterministic seeds gives:
 
-- first-TX success difference: `+0.516358`, 95% CI `[0.505829, 0.526887]`, Cohen `dz=9.6122`, paired-t `p=1.4474e-99`, `n=100`;
-- expected PHY goodput difference: `+1.870079 Mbps`, 95% CI `[1.728555, 2.011603]`, Cohen `dz=2.5899`, paired-t `p=6.9415e-46`, `n=100`.
+- first-transmission success difference: `+0.516358`, 95% CI `[0.505829, 0.526887]`, Cohen `dz=9.6122`, paired-t `p=1.4474e-99`;
+- expected PHY goodput difference: `+1.870079 Mbps`, 95% CI `[1.728555, 2.011603]`, Cohen `dz=2.5899`, paired-t `p=6.9415e-46`.
 
 These are `DERIVED_SYSTEM_LEVEL_METRIC_MATCHED_SEED_COMPARISON` results, not measurements.
 
-## Required manuscript edits before submission
+## Claim-preserving requirements
 
-1. Replace the stale final `Reproducibility note` in `paper/MANUSCRIPT.md`, which still points to publication run #1, with the canonical run #3 identifiers above.
-2. Replace the placeholder sentence in Section 5.4 about statistics being generated later with the frozen matched-seed effect sizes above.
-3. Keep the operating-envelope wording as **largest evaluated feasible swarm size**. Never state or imply a universal capacity limit.
-4. Keep `G` explicitly defined as a relative desired/interferer sensitivity abstraction (`+G/2` desired, `-G/2` interference), not measured beamforming gain or full MIMO.
-5. Keep 5G-LENA BLER curves classified as `LINK_LEVEL_SIMULATION`; do not call them 3GPP BLER curves or UAV measurements.
-6. Keep the Erdemir A2A coefficients described as fitted/measurement-derived parameters; arbitrary-distance RF values are model-derived.
-7. Do not call the conflict-graph resource allocator normative NR Sidelink Mode 1/2.
-8. Do not introduce measured swarm PDR, measured RF interference, end-to-end latency, fast-fading, or beam-tracking claims that are absent from the canonical evidence.
+1. Describe the A2A propagation law as a fitted measurement-derived large-scale model; simulated RF values are model-derived.
+2. Describe 5G-LENA BLER as `LINK_LEVEL_SIMULATION` evidence, not 3GPP-standard BLER curves or UAV measurements.
+3. Describe the conflict-graph allocator as a `THIS_WORK` system-level abstraction, not normative NR Sidelink Mode 1/2 scheduling.
+4. Describe `G` as an experimental relative desired/interferer sensitivity (`+G/2` desired and `-G/2` interference), not measured beamforming gain or full MIMO.
+5. Describe reliability as first-transmission success derived from modeled TB BLER, not measured PDR.
+6. Describe goodput as expected PHY goodput under the evaluated model, not end-to-end application throughput.
+7. Describe the operating envelope as the largest **evaluated** swarm size satisfying explicit policy thresholds, not a universal capacity limit.
+8. Do not introduce unsupported claims about measured swarm RF interference, measured PDR/BLER, end-to-end latency, full fast fading, or beam tracking.
+9. Treat AMOVFLY telemetry as mobility/trajectory evidence unless user-supplied raw data support an additional analysis.
 
-## Editorial pass
+## Editorial gate
 
-Before venue formatting, the manuscript should receive one claim-preserving editorial pass focused on:
+Before venue formatting:
 
-- shortening the abstract while retaining the baseline, `R=8,G=6`, and operating-envelope result;
-- sharpening the final paragraph of Related Work into a precise novelty statement;
-- reporting the matched-seed confidence intervals/effect sizes in Results rather than only ratios;
-- ensuring Discussion separates design implications from implemented mechanisms;
-- keeping Limitations adjacent to the strongest system-level claims;
-- replacing all run-#1 provenance with the frozen run-#3 evidence;
-- checking every reference against the verified literature matrix/full text before submission.
+- ensure all numerical claims match the current final campaign;
+- include the matched-seed confidence intervals and effect sizes in Results;
+- separate implemented mechanisms from design implications in Discussion;
+- keep limitations adjacent to the strongest system-level claims;
+- verify references against the project's literature evidence before submission;
+- only then apply venue-specific page/template constraints.
 
-## Submission gate
+## Final gate
 
-The paper is evidence-ready when all of the following hold:
-
-- manuscript numerical claims match the frozen run #3 artifact;
-- matched-seed statistics are present in the Results section;
-- reproducibility note names run #3 and its artifact digest;
-- no unsupported measurement/standard/MIMO/Mode-2 claims are introduced;
-- venue-specific page/template constraints are applied only after the scientific text is frozen.
+The scientific implementation and reproducibility package is ready for thesis/research handoff. Further scientific changes that affect results must create a new campaign commit and evidence record rather than silently modifying the frozen state.
