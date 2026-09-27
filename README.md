@@ -2,7 +2,7 @@
 
 Research-oriented Python system-level simulation project for **5G NR Sidelink communication inside UAV swarms**.
 
-## Thesis goal
+## Research objective
 
 Study how UAV swarm density and mobility affect UAV-to-UAV link quality, interference, reliability, latency, capacity/goodput and network connectivity, then evaluate controlled improvements from resource allocation, routing, link adaptation, HARQ and directional antenna gains.
 
@@ -12,9 +12,9 @@ The scientific pipeline is:
 
 ---
 
-# Canonical thesis results
+# Canonical research results
 
-The results below are from **final-thesis-campaign run #5** on canonical Git commit:
+The results below are from **canonical research campaign run #5** on Git commit:
 
 `fcae537ef0846b94c0c73ce306e15c406ab542f7`
 
@@ -201,7 +201,7 @@ Canonical figure: `fig17_traffic`.
 
 ---
 
-# Main thesis conclusion from the campaign
+# Main research conclusions from the campaign
 
 The evaluated system-level evidence supports four main conclusions:
 
@@ -249,28 +249,21 @@ A deliberately limited and auditable equal-height UMi-AV A2A implementation is i
 
 NR MCS Table 1, TBS and LDPC mechanics are implemented from the recorded 3GPP Release-19 specifications. Numerical SINR-to-BLER curves are sourced from verified 5G-LENA link-level simulation data where available. These curves are not UAV field measurements and are not called 3GPP-standard BLER curves.
 
-### Reproducible thesis pipeline
+### Reproducible research workflow
 
-Run the full registered suite with:
-
-```bash
-python -m tools.run_thesis_pipeline
-```
-
-Validate only the registry/manifest with:
-
-```bash
-python -m tools.run_thesis_pipeline --dry-run
-```
-
-Validation:
+Install dependencies and run the validation suite:
 
 ```bash
 pip install -r requirements.txt
 python -m pytest -q
 ```
 
-The canonical GitHub Actions workflow additionally runs the public AMOVFLY pair, finalizes the evidence bundle and executes the scientific audit.
+The registered research campaign is exercised through the repository's GitHub Actions workflows:
+
+- `.github/workflows/final-campaign.yml` — canonical campaign execution, evidence finalization and scientific audit
+- `.github/workflows/amovfly-public-pair.yml` — public AMOVFLY mobility evidence pipeline
+
+This keeps the public README focused on the research methodology, reproducible evidence and validated results.
 
 ## Canonical evidence locations
 
