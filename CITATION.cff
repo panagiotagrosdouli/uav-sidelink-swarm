@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software or research artifact, please cite it as below."
+title: "UAV Sidelink Swarm"
+type: software
+authors:
+  - family-names: "Grosdouli"
+    given-names: "Panagiota"
+repository-code: "https://github.com/panagiotagrosdouli/uav-sidelink-swarm"
+url: "https://github.com/panagiotagrosdouli/uav-sidelink-swarm"
+keywords:
+  - UAV swarm
+  - 5G NR sidelink
+  - UAV communications
+  - system-level simulation
+  - interference
+  - resource allocation
+  - HARQ
+  - routing
