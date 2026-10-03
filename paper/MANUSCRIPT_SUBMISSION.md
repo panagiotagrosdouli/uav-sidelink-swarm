@@ -114,9 +114,9 @@ For each (R,G), the envelope reports the **largest evaluated** swarm size satisf
 
 With one shared resource and no directional advantage, mean SINR decreases from -0.49 dB at N=5 to -23.03 dB at N=100. At N=100, first-transmission success is 0.0128 and expected PHY goodput is 0.359 Mbps. The high-density failure composition is dominated by aggregate interference: approximately 72.4% of policy-failed links are classified as aggregate-interference dominated, versus 27.6% as dominant-interferer failures. This indicates that the dense regime is primarily a many-interferer problem.
 
-### 5.2 Exact resource separation improves reliability despite its bandwidth cost
+### 5.2 Exact resource separation with the primary allocator improves reliability despite its bandwidth cost
 
-At N=100 and G=0:
+At N=100 and G=0 under the primary weighted conflict-graph assignment:
 
 | Resources | Mean SINR (dB) | First-TX success | Expected goodput (Mbps) |
 |---:|---:|---:|---:|
@@ -125,7 +125,7 @@ At N=100 and G=0:
 | 4 | -10.48 | 0.0775 | 0.572 |
 | 8 | -5.47 | 0.2049 | 1.042 |
 
-The non-monotonic goodput change between R=2 and R=4 is a central result rather than an anomaly. Increasing orthogonality improves SINR, but each additional partition also reduces per-link PRBs and TBS. Only when the interference reduction outweighs the bandwidth loss does expected goodput increase. The R=8 case crosses the 1 Mbps target at N=100 despite using the narrowest per-link resource partitions.
+The non-monotonic goodput change between R=2 and R=4 is a central result rather than an anomaly. Increasing orthogonality improves SINR, but each additional partition also reduces per-link PRBs and TBS. Only when the interference reduction outweighs the bandwidth loss does expected goodput increase. Under the primary allocator, the R=8 case crosses the 1 Mbps target at N=100 despite using the narrowest per-link resource partitions. Section 5.6 explicitly separates this frequency-isolation effect from the additional gain of conflict-aware assignment.
 
 ### 5.3 Directionality alone is insufficient in the densest shared-resource case
 
@@ -144,11 +144,11 @@ At N=100:
 | 8 | 6 | 0.53 | 0.5292 | 2.229 |
 | 8 | 9 | 3.53 | 0.8050 | 3.493 |
 
-The matched-seed comparison between R=8,G=6 and the R=1,G=0 baseline at N=100 shows a first-transmission success increase of +0.516358 with 95% CI [0.505829, 0.526887], Cohen dz=9.6122, paired-t p=1.4474e-99, n=100. Expected PHY goodput increases by +1.870079 Mbps with 95% CI [1.728555, 2.011603], dz=2.5899, paired-t p=6.9415e-46, n=100. These paired statistics are derived system-level comparisons across identical deterministic seeds.
+The matched-seed comparison between R=8,G=6 and the R=1,G=0 baseline at N=100 shows a first-transmission success increase of +0.516362. The Student-t 95% CI is [0.505703, 0.527021] and the deterministic bootstrap 95% CI is [0.505738, 0.526751], with Cohen dz=9.61 and Wilcoxon p=3.90e-18 (n=100). Expected PHY goodput increases by +1.870088 Mbps, with Student-t 95% CI [1.726815, 2.013360], bootstrap 95% CI [1.716869, 2.003005], dz=2.59, and Wilcoxon p=4.34e-17. These paired statistics are derived system-level comparisons across identical deterministic seeds; effect magnitudes and confidence intervals are the primary evidence.
 
-### 5.5 Evaluated operating envelope
+### 5.5 Evaluated operating envelope for the primary controlled regime
 
-Under the explicit policy requiring first-transmission success >=0.10 and expected goodput >=1 Mbps, the largest evaluated feasible swarm sizes are:
+Under the primary geometry-independent pairing and weighted conflict-graph allocator, and the explicit policy requiring first-transmission success >=0.10 and expected goodput >=1 Mbps, the largest evaluated feasible swarm sizes are:
 
 | Resources R | G=0 dB | G=3 dB | G=6 dB | G=9 dB |
 |---:|---:|---:|---:|---:|
@@ -157,7 +157,7 @@ Under the explicit policy requiring first-transmission success >=0.10 and expect
 | 4 | 50 | 75 | 100 | 100 |
 | 8 | 100 | 100 | 100 | 100 |
 
-The result should not be read as “100 UAVs are universally supported.” The evaluated grid is capped at N=100. The finding is that the feasible region shifts substantially when interference is reduced before BLER mapping. Moderate resource separation combined with moderate spatial selectivity can reach the same evaluated boundary as much stronger partitioning, while directionality alone on one shared resource does not.
+The result should not be read as “100 UAVs are universally supported.” The evaluated grid is capped at N=100, and the envelope is conditioned on the primary pairing and allocator. Within that controlled regime, the feasible region shifts substantially when interference is reduced before BLER mapping. Moderate resource separation combined with moderate spatial selectivity can reach the same evaluated boundary as much stronger partitioning, while directionality alone on one shared resource does not. Section 5.6 quantifies how random assignment and local nearest-neighbour pairing change this boundary interpretation.
 
 ### 5.6 Allocation and pairing sensitivities bound the interpretation
 
