@@ -1,0 +1,7 @@
+n_resources,pairing,mean_first_tx_success
+1,nearest_neighbor,0.476552348923062
+4,nearest_neighbor,0.8772173022718319
+8,nearest_neighbor,0.9464627000708384
+1,sequential,0.0128238026380211
+4,sequential,0.0775341046369444
+8,sequential,0.2049045413587939
