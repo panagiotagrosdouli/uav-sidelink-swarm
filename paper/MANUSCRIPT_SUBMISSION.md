@@ -208,11 +208,11 @@ The strongest qualification is communication locality: nearest-neighbour pairing
 
 [6] H. Zhang, H.-M. Chen, Q.-J. Wei, Z.-W. Wang, and Y.-H. Sun, “Optimized Synchronization Design for UAV Swarm Network Based on Sidelink,” *Drones*, vol. 10, no. 4, 304, 2026. DOI: `10.3390/drones10040304`.
 
-[7] U. Erdemir et al., “Measurement-based Channel Characterization for A2A and A2G Wireless Drone Communication Systems,” IEEE VTC 2023-Spring, 2023. DOI: `10.1109/VTC2023-Spring57618.2023.10199853`.
+[7] U. Erdemir, B. Kaplan, I. Hökelek, A. Görçin, and H. A. Çirpan, “Measurement-based Channel Characterization for A2A and A2G Wireless Drone Communication Systems,” *2023 IEEE 97th Vehicular Technology Conference (VTC2023-Spring)*, 2023. DOI: `10.1109/VTC2023-Spring57618.2023.10199853`.
 
-[8] N. Patriciello et al., “An E2E simulator for 5G NR networks,” *Simulation Modelling Practice and Theory*, vol. 96, 101933, 2019. DOI: `10.1016/j.simpat.2019.101933`.
+[8] N. Patriciello, S. Lagen, B. Bojovic, and L. Giupponi, “An E2E simulator for 5G NR networks,” *Simulation Modelling Practice and Theory*, vol. 96, 101933, 2019. DOI: `10.1016/j.simpat.2019.101933`.
 
-[9] CTTC 5G-LENA v5.0 software archive. DOI: `10.5281/zenodo.21165297`.
+[9] G. Ferreira, B. Bojovic, A. Larrañaga, A. Ashtari, K. Koutlia, J. Albuquerque, and S. Lagen, “5G-LENA ns-3 nr module,” version 5g-lena-v5.0.y, Zenodo, 2026. DOI: `10.5281/zenodo.21165297`.
 
 [10] 3GPP TR 38.901 V19.4.0; 3GPP TR 36.777; 3GPP TS 38.211/38.212/38.213/38.214 and TS 38.104, project-recorded versions.
 
