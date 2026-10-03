@@ -18,6 +18,8 @@ Do not discuss routing, traffic, AMOVFLY, HARQ details, or thesis-wide experimen
 
 ### Page 2 — Related Work + System Model
 
+Include one compact closest-work comparison table and one compact system-parameter table. Explicitly state the 1000 m × 1000 m area, 100 m altitude, 30 dBm Tx power, 7 dB noise figure, full activity, sequential disjoint baseline pairing, weighted conflict-graph allocator, and idealized adaptive-MCS semantics. Mention the separate pairing/random-allocation/fixed-MCS/exact-bandwidth robustness campaign in one sentence.
+
 Related work: compress to 4–6 closest references and one paragraph. Contrast against:
 
 - 5G sidelink UAV swarm scheduling/network formation;
