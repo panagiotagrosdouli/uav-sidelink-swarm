@@ -35,7 +35,7 @@ Artifact ID:
 Artifact digest:
 sha256:f3e6fe8ffac63168d878447bfd61f297f442a55c20b742e4def0374027350099
 
-The compact CSV files in data/ are publication extracts from that audited evidence and regenerate the four paper figures.
+The compact CSV files in `data/` are audited publication extracts. The current submission regenerates three figures; the legacy failure-regime extract is retained for provenance but is no longer used in the paper because its per-seed conditional-fraction aggregation was judged too easy to misinterpret.
 
 ## Bibliographic verification
 
@@ -53,10 +53,10 @@ The expected output is exactly 5 pages.
 
 ## Scientific claim boundary
 
-The paper reports system-level simulation/model-derived results. It does not claim measured multi-UAV RF performance, normative Mode-1/Mode-2 scheduling, full fast fading, full MIMO/beam management, or a universal maximum swarm size. The completed robustness campaign shows that the severe baseline density collapse is topology-sensitive; this limitation is central to the paper rather than hidden.
+The paper reports system-level simulation/model-derived results. For swarm size `N`, only `floor(N/2)` one-way disjoint links are simultaneously active in a static snapshot. The resource grid, allocator, MCS adaptation, directional advantage, and frequency-resource orthogonality are explicit research abstractions; the paper does not claim measured multi-UAV RF performance, standards-complete Mode-1/Mode-2 scheduling, full fading/beam management, or a universal maximum swarm size.
 
 ## Before submission
 
 Confirm the final author list, corresponding-author email, affiliations, supervisor/co-author approval, and the current VTC submission instructions. Do not add co-authors or contact details unless they have been explicitly confirmed.
 
-The draft includes an acknowledgment disclosing the use of OpenAI ChatGPT for editing/compression and LaTeX formatting; scientific design, experiments, interpretation, source verification, and final responsibility remain with the author.
+The draft includes the venue-required acknowledgment that OpenAI ChatGPT was used as an editing assistant for language, compression, LaTeX formatting, and bibliographic organization. It was not used to generate simulation data; final scientific responsibility remains with the author.

@@ -4,22 +4,28 @@
 
 - [x] Main 100-seed operating-envelope campaign completed successfully.
 - [x] 100-seed topology/allocator/link-adaptation/noise-bandwidth robustness campaign completed successfully.
+- [x] Active-link semantics are explicit: `floor(N/2)` simultaneous one-way disjoint links per snapshot.
 - [x] Topology-dependent density claim corrected after robustness testing.
-- [x] Random-allocation baseline included.
-- [x] Fixed-MCS baseline included.
+- [x] Random-allocation and fixed-MCS controls included.
 - [x] Paired-bootstrap confidence intervals included for the main matched-seed comparison.
-- [x] Measurement-derived, link-level-simulation, derived, and experimental quantities are distinguished.
-- [x] Limitations state that this is not a standards-complete sidelink PHY/MAC implementation.
+- [x] Expected PHY goodput is explicitly defined and separated from application/network throughput.
+- [x] Operating-envelope thresholds are identified as mean point-estimate engineering policies, not guarantees.
+- [x] Resource-grid, perfect-orthogonality, allocator, MCS-adaptation, and directional-gain abstractions are explicit.
+- [x] 5G-LENA curves are identified as generic NR EESM link-level simulation evidence, not PSSCH measurements/standards.
+- [x] Channel measurement domain and synthetic-distance extrapolation are stated.
+- [x] Weak failure-composition figure removed; retained N=100 classification is labeled heuristic.
 
 ## Paper QA
 
 - [x] IEEE conference two-column layout.
-- [x] Exactly 5 pages in the current compiled draft.
-- [x] No observed clipping or overlapping content in rendered-page inspection.
-- [x] No overfull hbox warnings in the current local build.
+- [x] References and DOIs/standard metadata checked against publisher/repository records.
+- [x] No missing or unused citation keys in the audited source.
+- [x] AI-editing disclosure aligned with the VTC policy.
 - [x] Figures regenerate from committed CSV extracts.
-- [x] References and DOIs checked against publisher/repository records.
-- [x] AI-editing disclosure included in the acknowledgment.
+- [ ] Final branch CI confirms exactly 5 pages.
+- [ ] Final branch CI confirms no overfull boxes.
+- [ ] Final branch CI confirms no undefined citations/references.
+- [ ] Final PDF rendered and visually inspected after the audit merge.
 
 ## Human confirmation before upload
 

@@ -29,6 +29,25 @@ jobs:
           pip install pandas matplotlib pypdf
           python paper/vtc2027/make_figures.py
 
+      - name: Validate citation-key integrity
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path("paper/vtc2027")
+          body = "\n".join(p.read_text(encoding="utf-8") for p in sorted((root / "sections").glob("*.tex")))
+          refs = (root / "references.tex").read_text(encoding="utf-8")
+          cited = []
+          for group in re.findall(r"\\cite\{([^}]+)\}", body):
+              cited.extend(key.strip() for key in group.split(","))
+          bib = re.findall(r"\\bibitem\{([^}]+)\}", refs)
+          missing = sorted(set(cited) - set(bib))
+          unused = sorted(set(bib) - set(cited))
+          if missing or unused:
+              raise SystemExit(f"citation audit failed: missing={missing}, unused={unused}")
+          print(f"Citation audit OK: {len(set(cited))} cited / {len(bib)} bibliography entries")
+          PY
       - name: Compile IEEE paper
         uses: xu-cheng/latex-action@v3
         with:
@@ -36,6 +55,12 @@ jobs:
           working_directory: paper/vtc2027
           args: -pdf -interaction=nonstopmode -halt-on-error -file-line-error
 
+      - name: Reject undefined citations and references
+        run: |
+          if grep -Eq "Citation .* undefined|Reference .* undefined|There were undefined references" paper/vtc2027/main.log; then
+            grep -E "Citation .* undefined|Reference .* undefined|There were undefined references" paper/vtc2027/main.log
+            exit 1
+          fi
       - name: Verify five-page limit
         run: |
           python - <<'PY'
@@ -67,5 +92,7 @@ jobs:
             paper/vtc2027/data/
             paper/vtc2027/README.md
             paper/vtc2027/SUBMISSION_CHECKLIST.md
+            paper/vtc2027/CITATION_AUDIT.md
+            paper/vtc2027/PRE_SUBMISSION_AUDIT.md
           if-no-files-found: error
           retention-days: 90
