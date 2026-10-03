@@ -37,6 +37,10 @@ sha256:f3e6fe8ffac63168d878447bfd61f297f442a55c20b742e4def0374027350099
 
 The compact CSV files in data/ are publication extracts from that audited evidence and regenerate the four paper figures.
 
+## Bibliographic verification
+
+The paper uses only references whose publication metadata were checked against publisher, institutional, Zenodo, or official 3GPP/ETSI sources. The verification record is stored in `CITATION_AUDIT.md`. External citations support background/standardization/provenance claims; manuscript numerical results remain attributed to the repository's audited simulation evidence.
+
 ## Local build
 
 From paper/vtc2027:
