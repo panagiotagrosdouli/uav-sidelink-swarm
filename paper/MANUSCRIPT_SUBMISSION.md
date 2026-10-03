@@ -1,10 +1,10 @@
-# Interference Scaling and Cross-Layer Mitigation in 5G NR Sidelink UAV Swarms
+# Interference Scaling, Resource Isolation, and Topology Sensitivity in 5G NR Sidelink UAV Swarms
 
 > **Submission draft.** All numerical RF/network results reported here are simulation/model-derived unless explicitly stated otherwise. The paper does not claim measured multi-UAV RF performance.
 
 ## Abstract
 
-Direct NR sidelink is attractive for infrastructure-independent communication inside unmanned aerial vehicle (UAV) swarms, but dense line-of-sight aerial deployments can become strongly interference-limited. This paper quantifies how swarm density, exact frequency-resource partitioning, and directional spatial selectivity jointly determine the feasible reliability/goodput operating region. The system model combines a 3.5 GHz air-to-air path-loss fit derived from a published UAV measurement campaign, standards-based NR MCS/TBS/LDPC mechanics, and SINR-to-BLER curves processed from the official 5G-LENA v5.0 link-level dataset. A 100-seed system-level campaign evaluates 5–100 UAVs, exact partitions of a 133-PRB 50 MHz / 30 kHz profile into 1, 2, 4, or 8 orthogonal frequency resources, and an experimental 0–9 dB desired/interferer directional relative advantage. With one shared resource and no directional advantage, mean SINR falls from -0.49 dB at 5 UAVs to -23.03 dB at 100 UAVs; at 100 UAVs, first-transmission success is 0.0128 and expected PHY goodput is 0.359 Mbps. Exact partitioning into eight resources, while reducing per-link bandwidth, increases those values to 0.2049 and 1.042 Mbps. Combining eight resources with a 6 dB experimental directional relative advantage yields 0.5292 first-transmission success and 2.229 Mbps expected goodput. Under an explicit engineering policy requiring first-transmission success >= 0.10 and expected goodput >= 1 Mbps, the largest evaluated feasible swarm size shifts from 10 UAVs in the baseline to the 100-UAV boundary for several resource/directionality combinations. Matched-seed analysis at 100 UAVs shows that R=8,G=6 increases first-transmission success by 0.5164 (95% CI [0.5058, 0.5269], Cohen dz=9.61) and expected goodput by 1.870 Mbps (95% CI [1.729, 2.012], dz=2.59) relative to R=1,G=0. These results characterize an evaluated operating envelope rather than a universal swarm-capacity limit and indicate that interference should be reduced before retransmission through coordinated resource reuse and spatial selectivity.
+Direct NR sidelink is attractive for infrastructure-independent communication inside unmanned aerial vehicle (UAV) swarms, but the interference regime depends jointly on density, communication topology, resource reuse, and spatial selectivity. This paper presents a measurement-grounded, NR-aware system-level study using a published 3.5 GHz air-to-air path-loss fit, standards-based NR MCS/TBS/LDPC mechanics, and official 5G-LENA v5.0 SINR-to-BLER data. A 100-seed baseline campaign evaluates 5–100 UAVs, exact partitions of a 133-PRB 50 MHz / 30 kHz profile into 1/2/4/8 resources, and an experimental 0–9 dB desired/interferer directional relative advantage. Under the baseline full-load sequential-disjoint topology, mean SINR falls to -23.03 dB at 100 UAVs; first-transmission success is 0.0128 and expected PHY goodput is 0.359 Mbps. At the same N, R=8,G=6 yields 0.5292 success and 2.229 Mbps, with matched-seed differences of +0.5164 success and +1.870 Mbps goodput. A separate 100-seed robustness campaign shows that topology is critical: nearest-neighbour pairing at N=100,R=1,G=0 shortens the mean desired link from 517 m to 84 m and increases success to 0.4766 and goodput to 15.116 Mbps. Random-allocation and fixed-MCS checks also reduce performance relative to the main allocator/adaptation assumptions, whereas exact PRB-noise-bandwidth accounting has negligible impact in the evaluated interference regimes. The results therefore characterize topology-dependent operating regions rather than a universal swarm-capacity limit.
 
 ## 1. Introduction
 
@@ -14,9 +14,9 @@ Aerial propagation creates a difficult interference regime. Strong line-of-sight
 
 This paper asks:
 
-> **How does UAV swarm density change the interference regime of NR sidelink, and how far can frequency-resource separation and directional spatial selectivity extend the feasible reliability/goodput operating region?**
+> **How do swarm density and communication topology change the NR sidelink interference regime, and how far can resource separation and directional spatial selectivity extend the feasible reliability/goodput operating region?**
 
-The paper makes three contributions. First, it provides a measurement-grounded, NR-aware system evaluation that combines a published 3.5 GHz A2A path-loss fit, standards-based NR transport-block mechanics, and sourced 5G-LENA v5.0 BLER curves. Second, it quantifies density-dependent degradation in SINR, first-transmission success, expected PHY goodput, fairness, and failure composition from 5 to 100 UAVs. Third, it constructs an exact-resource operating envelope in which the 133-PRB profile is partitioned into 1/2/4/8 resources and all per-resource bandwidth, noise, TBS, LDPC/CBS, and BLER mappings are recomputed before combining the result with an experimental directional-advantage sweep.
+The paper makes three contributions. First, it provides a measurement-grounded, NR-aware system evaluation that combines a published 3.5 GHz A2A path-loss fit, standards-based NR transport-block mechanics, and sourced 5G-LENA v5.0 BLER curves. Second, it quantifies the interference and reliability/goodput operating region under a controlled full-load baseline while explicitly accounting for the PRB/TBS cost of resource partitioning and experimental spatial selectivity. Third, it performs a matched-seed robustness analysis over communication pairing, resource-allocation policy, link adaptation, and noise-bandwidth accounting, showing which conclusions are topology-dependent and which remain stable across modeling choices.
 
 The study is intentionally system-level. It does not claim a bit-accurate NR sidelink PHY, normative Mode-1/Mode-2 scheduling, measured swarm PDR/BLER/latency, or full MIMO/beam-management behavior.
 
@@ -123,9 +123,9 @@ For each (R,G), the envelope reports the **largest evaluated** swarm size satisf
 
 ## 5. Results
 
-### 5.1 Density drives the baseline into a severe interference-limited regime
+### 5.1 The full-load long-link baseline enters a severe interference-limited regime
 
-With one shared resource and no directional advantage, mean SINR decreases from -0.49 dB at N=5 to -23.03 dB at N=100. At N=100, first-transmission success is 0.0128 and expected PHY goodput is 0.359 Mbps. The high-density failure composition is dominated by aggregate interference: approximately 72.4% of policy-failed links are classified as aggregate-interference dominated, versus 27.6% as dominant-interferer failures. This indicates that the dense regime is primarily a many-interferer problem.
+Under the baseline sequential-disjoint pairing, desired transmitter/receiver identities are independent of spatial proximity, producing a mean desired-link distance of approximately 517 m at N=100. With one shared resource and no directional advantage, mean SINR decreases from -0.49 dB at N=5 to -23.03 dB at N=100. At N=100, first-transmission success is 0.0128 and expected PHY goodput is 0.359 Mbps. The high-density failure composition is dominated by aggregate interference: approximately 72.4% of policy-failed links are classified as aggregate-interference dominated, versus 27.6% as dominant-interferer failures. This is a baseline-topology result rather than evidence that density alone universally causes such collapse.
 
 ### 5.2 Exact resource separation improves reliability despite its bandwidth cost
 
@@ -172,6 +172,16 @@ Under the explicit policy requiring first-transmission success >=0.10 and expect
 
 The result should not be read as “100 UAVs are universally supported.” The evaluated grid is capped at N=100. The finding is that the feasible region shifts substantially when interference is reduced before BLER mapping. Moderate resource separation combined with moderate spatial selectivity can reach the same evaluated boundary as much stronger partitioning, while directionality alone on one shared resource does not.
 
+### 5.6 Robustness: topology dominates the baseline regime, while allocator and adaptation remain material
+
+The reviewer-facing 100-seed robustness campaign changes one modeling dimension at a time while preserving the same propagation and NR link-evaluation evidence. The strongest sensitivity is communication topology. At N=100,R=1,G=0, replacing sequential disjoint pairing by nearest-neighbour disjoint pairing reduces mean desired-link distance from 517.20 m to 84.05 m. Mean SINR changes from -23.03 dB (95% CI [-23.21,-22.84]) to -1.75 dB ([-1.89,-1.61]), first-TX success from 0.0128 ([0.0104,0.0153]) to 0.4766 ([0.4668,0.4863]), and expected goodput from 0.359 Mbps ([0.224,0.494]) to 15.116 Mbps ([14.497,15.736]). Thus, the headline density collapse is not topology invariant: maintaining short desired links can preserve a much healthier shared-resource operating point even at high N.
+
+Resource coordination remains beneficial within either topology. At N=100,R=8,G=0 with sequential pairing, the weighted conflict-graph allocator gives success 0.2049 and goodput 1.042 Mbps, versus 0.1463 and 0.815 Mbps for seeded random allocation. With nearest-neighbour pairing, the corresponding values are 0.9465/10.836 Mbps versus 0.8824/8.357 Mbps. This separates the benefit of having multiple resources from the additional benefit of geometry-aware reuse.
+
+Link adaptation is also material. At N=100,R=8,G=6 under sequential pairing, adaptive MCS gives success 0.5292 and goodput 2.229 Mbps, whereas fixed MCS-4 gives 0.3309 and 0.722 Mbps. The paper therefore treats the adaptive-MCS result as an optimistic system-level control assumption rather than a normative AMC implementation.
+
+Finally, replacing nominal-channel PRB-share noise accounting with exact occupied PRB bandwidth changes mean SINR by at most 0.113 dB over the overlapping robustness grid, first-TX success by less than 7.4e-5, and expected goodput by less than 3.1e-4 Mbps. The main qualitative conclusions are therefore insensitive to this bandwidth-accounting convention in the evaluated interference regimes.
+
 ## 6. Discussion
 
 ### 6.1 Interference should be reduced before retransmission
@@ -182,7 +192,11 @@ The broader thesis campaign showed that when first-transmission TB BLER is alrea
 
 A model that removes co-channel interferers while leaving every link with all 133 PRBs would overstate the benefit of orthogonalization. Exact PRB partitioning exposes the actual trade-off between fewer interferers and smaller TBS/occupied bandwidth. The N=100 R=2 versus R=4 goodput result makes this cost visible and prevents the trivial conclusion that more orthogonal resources are always better.
 
-### 6.3 Implications for aerial sidelink design
+### 6.3 Topology control is a first-order interference-management mechanism
+
+The nearest-neighbour sensitivity shows that swarm density cannot be interpreted independently of desired-link geometry. Increasing N while preserving arbitrary long desired links produces a very different SINR distribution from increasing N while allowing each node to communicate locally. In practice, clustering, neighbor selection, relay selection, or topology-aware pairing can therefore be as important as frequency partitioning. The operating envelope should consequently be parameterized by communication topology rather than treated as a function of N alone.
+
+### 6.4 Implications for aerial sidelink design
 
 The results motivate mechanisms that jointly coordinate resource reuse and exploit spatial selectivity. A practical distributed or centralized scheduler could estimate local interference conditions and select whether additional orthogonal separation is worth its bandwidth cost. Directional arrays could then suppress the residual co-channel interference. The present work does not claim to implement such a standards-complete scheduler or beam-management procedure; it provides the operating-region characterization needed to motivate and evaluate them.
 
@@ -192,7 +206,7 @@ No measured multi-UAV RF interference, BLER, PDR, or end-to-end latency is claim
 
 ## 8. Conclusion
 
-Dense shared-resource UAV sidelink becomes severely interference-limited as swarm size increases, with high-density failures dominated by aggregate interference. Exact frequency-resource partitioning can recover substantial reliability even after accounting for the corresponding PRB/TBS reduction, while directional spatial selectivity provides complementary gain. In the evaluated campaign, the baseline engineering-policy envelope reaches N=10, whereas several resource/directionality combinations reach the N=100 boundary. At N=100, R=8,G=6 improves first-transmission success by 0.5164 and expected PHY goodput by 1.870 Mbps relative to the baseline under matched seeds. The design implication is therefore not to rely on retransmission alone, but to reduce interference before decoding through coordinated resource reuse and spatial selectivity. Future work should validate these trends with standards-complete sidelink resource selection/beam management and, ultimately, multi-UAV RF measurements.
+Under the evaluated full-load sequential-disjoint topology, dense shared-resource UAV sidelink becomes severely interference-limited, and exact resource partitioning plus directional relative advantage substantially expand the evaluated reliability/goodput operating region. At N=100, R=8,G=6 improves first-transmission success by 0.5164 and expected PHY goodput by 1.870 Mbps relative to that baseline under matched seeds. The robustness campaign, however, shows that this collapse is not a density-only law: nearest-neighbour pairing at N=100 shortens desired links enough to raise shared-resource success from 0.0128 to 0.4766 and goodput from 0.359 to 15.116 Mbps. Geometry-aware resource allocation and adaptive MCS provide additional gains, while exact PRB-noise-bandwidth accounting has negligible effect in the evaluated interference regimes. The central design implication is therefore broader than resource partitioning alone: dense aerial sidelink should jointly control communication topology, resource reuse, spatial selectivity, and link adaptation. Future work should validate these topology-dependent operating regions with standards-complete sidelink procedures, realistic beam management/fast fading, and ultimately multi-UAV RF measurements.
 
 ## References
 
@@ -216,6 +230,8 @@ Dense shared-resource UAV sidelink becomes severely interference-limited as swar
 
 [10] 3GPP TR 38.901 V19.4.0; 3GPP TR 36.777; 3GPP TS 38.211/38.212/38.213/38.214 and TS 38.104, project-recorded versions.
 
-## Reproducibility and frozen evidence
+## Reproducibility and current evidence
 
-The canonical scientific evidence for this submission draft is frozen at commit `9fb112307270d9d39408e704f285ea91d20a735b`, workflow `paper-operating-envelope` run #3 (run ID `34085307799`). The frozen artifact is `paper-operating-envelope-9fb112307270d9d39408e704f285ea91d20a735b`, artifact ID `10005074790`, digest `sha256:4a996afe9dffa7984a5a0cfa6276a6f727228cd1ee2cbbd6e7f1634e8c149137`. The artifact contains 11,200 per-seed realizations, 112 scenario summaries, 84 matched-seed comparisons, and 16 operating-envelope points with no missing values in the audited tables. The evidence metadata is recorded in `docs/experiments/012_publication_evidence.md`.
+The current submission evidence was regenerated successfully on commit `f224ba9e5f95a23a088db24479c67461fcf497e6` by GitHub Actions workflow `paper-operating-envelope` run #26 (run ID `37106664614`). The uploaded artifact is `paper-operating-envelope-f224ba9e5f95a23a088db24479c67461fcf497e6`, artifact ID `11267104157`, digest `sha256:f3e6fe8ffac63168d878447bfd61f297f442a55c20b742e4def0374027350099`.
+
+The artifact contains the 100-seed operating-envelope tables, paired normal and bootstrap confidence intervals, figures, the exact submission manuscript, claim guardrails, and the 100-seed reviewer robustness tables under `results/paper_robustness/`. The historical publication freeze in `docs/experiments/012_publication_evidence.md` remains preserved for provenance; the new robustness evidence is documented under `docs/experiments/013_reviewer_robustness.md`.
