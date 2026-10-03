@@ -1,0 +1,36 @@
+name: paper-reviewer-validation
+
+on:
+  pull_request:
+    paths:
+      - "simulations/paper_operating_envelope.py"
+      - "simulations/paper_robustness.py"
+      - "src/sidelink/**"
+      - "src/swarm_system.py"
+      - "src/statistical_tests.py"
+      - "tools/summarize_paper_results.py"
+      - "paper/**"
+      - "tests/**"
+      - ".github/workflows/paper-reviewer-validation.yml"
+
+jobs:
+  reviewer-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run unit tests
+        run: python -m pytest -q
+      - name: Prepare official 5G-LENA v5.0 full Table-1 BLER curves
+        run: python -m tools.prepare_5glena_v5_bler
+      - name: Run publication smoke validation
+        run: python -m simulations.paper_operating_envelope --smoke
+      - name: Run reviewer robustness smoke validation
+        run: python -m simulations.paper_robustness --smoke --seeds 5
