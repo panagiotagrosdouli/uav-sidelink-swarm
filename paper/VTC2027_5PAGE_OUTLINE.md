@@ -1,6 +1,6 @@
 # VTC2027-Spring — 5-page compression outline
 
-Target contribution: **measurement-grounded, NR-aware characterization of the interference operating envelope of dense UAV sidelink under exact frequency-resource partitioning and directional spatial selectivity.**
+Target contribution: **measurement-grounded, NR-aware characterization of topology-dependent UAV sidelink interference, exact frequency-resource trade-offs, and directional spatial selectivity.**
 
 ## Page budget
 
@@ -11,10 +11,10 @@ Keep the abstract close to 150–180 words. Introduction should establish: (i) N
 End the introduction with exactly three contributions:
 
 1. measurement-grounded / NR-aware system evaluation;
-2. density-dependent interference characterization;
-3. exact-resource + directionality operating envelope.
+2. topology-conditioned interference characterization, including nearest-neighbour robustness;
+3. exact-resource + directionality operating envelope with random-allocation/fixed-MCS controls.
 
-Do not discuss routing, traffic, AMOVFLY, HARQ details, or thesis-wide experiments here.
+Do not discuss routing, traffic, AMOVFLY, HARQ details, or thesis-wide experiments here. The topology robustness result is now central and must remain in the 5-page paper.
 
 ### Page 2 — Related Work + System Model
 

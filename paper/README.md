@@ -10,19 +10,19 @@ The material in this directory is prepared for scientific submission and reprodu
 
 ## Working title
 
-**Interference Scaling and Cross-Layer Mitigation in 5G NR Sidelink UAV Swarms**
+**Interference Scaling, Resource Isolation, and Topology Sensitivity in 5G NR Sidelink UAV Swarms**
 
 ## Central research question
 
-> How does UAV swarm density change the interference regime of NR sidelink, and how far can resource separation and spatial directionality extend the feasible reliability/goodput operating region?
+> How do swarm density and communication topology change the NR sidelink interference regime, and how far can resource separation and spatial directionality extend the feasible reliability/goodput operating region?
 
 This paper is deliberately narrower than the full project campaign. It does **not** attempt to report every implemented experiment.
 
 ## Core contributions
 
 1. **Measurement-grounded, NR-aware system framework.** Large-scale A2A propagation is anchored in the Erdemir et al. 3.5 GHz measurement-derived fit; NR MCS/TBS/LDPC mechanics are standards-based; numerical SINR-to-BLER evidence is sourced from verified 5G-LENA link-level simulation data where available.
-2. **Density-dependent interference-regime characterization.** Quantify SINR, BLER, first-transmission success, expected PHY goodput, and failure composition as swarm size increases.
-3. **Cross-layer operating envelope.** Quantify the interaction among swarm size, orthogonal resource separation, and directional desired/interference advantage, and derive the largest evaluated swarm size satisfying explicit reliability/goodput targets.
+2. **Topology-conditioned interference characterization.** Quantify SINR, BLER, first-transmission success, expected PHY goodput, and failure composition under the baseline topology and test sensitivity to nearest-neighbour pairing.
+3. **Resource/spatial-selectivity operating envelope with robustness controls.** Quantify the interaction among swarm size, resource separation, directional relative advantage, allocator choice, and link adaptation without presenting the result as a universal capacity law.
 
 ## Paper-specific experiment
 
@@ -61,7 +61,7 @@ To address common system-level reviewer concerns without changing the frozen hea
 - adaptive expected-goodput-maximizing MCS versus fixed MCS-4;
 - exact PRB occupied-noise bandwidth (`N_PRB × 12 × SCS`) versus the frozen experiment's nominal-channel PRB-share convention.
 
-The robustness campaign is supplementary evidence. Its results must be cited only after a successful committed workflow run and must not be mixed numerically with the frozen operating-envelope tables.
+The robustness campaign completed successfully on commit `f224ba9e5f95a23a088db24479c67461fcf497e6` in workflow run #26. Its strongest finding is that the baseline density collapse is topology-sensitive: nearest-neighbour pairing at N=100,R=1,G=0 changes mean desired-link distance from about 517 m to 84 m, first-TX success from 0.0128 to 0.4766, and expected goodput from 0.359 to 15.116 Mbps. These values supplement rather than overwrite the baseline operating-envelope tables.
 
 ## Evidence separation
 
