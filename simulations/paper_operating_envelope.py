@@ -8,9 +8,13 @@ Scientific semantics
 * 133 FR1 PRBs are partitioned exactly across R orthogonal frequency resources.
   Each link uses the PRB count of its assigned resource, so resource separation
   changes co-channel interference, occupied noise bandwidth, TBS and LDPC/CBS.
+* Occupied noise bandwidth is computed from allocated PRBs as
+  n_PRB * 12 subcarriers * SCS, rather than scaling the nominal channel bandwidth.
 * Directional relative advantage G is split as +G/2 dB desired gain and -G/2 dB
   co-channel interference gain. It is a sensitivity abstraction, not full MIMO.
 * Numerical SINR->BLER curves are LINK_LEVEL_SIMULATION data from 5G-LENA.
+* Pairing and resource allocation are explicit experiment factors so reviewer
+  sensitivity studies can reuse exactly the same PHY/link-evaluation path.
 """
 from __future__ import annotations
 
@@ -23,11 +27,12 @@ import pandas as pd
 
 from src.metrics import jain_fairness, mean_ci95
 from src.sidelink.adaptive_tb import load_preferred_bler_curves, select_tbs_aware_mcs
-from src.sidelink.resource_allocation import weighted_conflict_graph_allocation
+from src.sidelink.resource_allocation import random_allocation, weighted_conflict_graph_allocation
 from src.sidelink.resource_grid import SidelinkResourceGrid, thesis_profile_50mhz_30khz
 from src.swarm_system import (
     SwarmConfig,
     build_disjoint_pairs,
+    build_nearest_disjoint_pairs,
     dbm_to_w,
     generate_equal_altitude_positions,
     received_power_w,
@@ -41,6 +46,10 @@ SUCCESS_TARGET = 0.10
 GOODPUT_TARGET_MBPS = 1.0
 FAILURE_SUCCESS_POLICY = 0.50
 TOTAL_PRB = 133
+MAIN_PAIRING_MODE = "sequential"
+MAIN_ALLOCATOR_MODE = "weighted_conflict_graph"
+SUPPORTED_PAIRING_MODES = ("sequential", "nearest_neighbor")
+SUPPORTED_ALLOCATOR_MODES = ("weighted_conflict_graph", "random")
 
 
 def prb_partition(n_resources: int) -> list[int]:
@@ -49,6 +58,15 @@ def prb_partition(n_resources: int) -> list[int]:
         raise ValueError("n_resources must be in [1, 133]")
     base, remainder = divmod(TOTAL_PRB, n_resources)
     return [base + (1 if i < remainder else 0) for i in range(n_resources)]
+
+
+def occupied_bandwidth_hz(n_prb: int, scs_khz: int = 30) -> float:
+    """Occupied OFDM bandwidth represented by allocated PRB subcarriers."""
+    if n_prb < 1:
+        raise ValueError("n_prb must be positive")
+    if scs_khz <= 0:
+        raise ValueError("scs_khz must be positive")
+    return float(n_prb * 12 * scs_khz * 1e3)
 
 
 def grid_for_prbs(n_prb: int) -> SidelinkResourceGrid:
@@ -65,18 +83,57 @@ def grid_for_prbs(n_prb: int) -> SidelinkResourceGrid:
     )
 
 
-def snapshot(seed: int, n_uavs: int, n_resources: int, advantage_db: float, curves) -> dict[str, float | int]:
-    cfg = SwarmConfig(n_uavs=n_uavs, seed=seed, channel="measured_a2a")
+def build_pairs(positions: np.ndarray, pairing_mode: str) -> list[tuple[int, int]]:
+    if pairing_mode == "sequential":
+        return build_disjoint_pairs(len(positions))
+    if pairing_mode == "nearest_neighbor":
+        return build_nearest_disjoint_pairs(positions)
+    raise ValueError(f"unsupported pairing_mode: {pairing_mode}")
+
+
+def allocate_resources(
+    tx_pos: np.ndarray,
+    rx_pos: np.ndarray,
+    n_resources: int,
+    allocator_mode: str,
+    seed: int,
+) -> np.ndarray:
+    if n_resources == 1:
+        return np.zeros(len(tx_pos), dtype=int)
+    if allocator_mode == "weighted_conflict_graph":
+        return weighted_conflict_graph_allocation(tx_pos, rx_pos, n_resources).resources
+    if allocator_mode == "random":
+        # Use a deterministic but distinct RNG stream from the geometry seed.
+        # This preserves matched reproducibility without coupling the first
+        # random-allocation draws to the position generator's sequence.
+        allocator_seed = int(seed) + 1_000_003
+        return random_allocation(len(tx_pos), n_resources, seed=allocator_seed).resources
+    raise ValueError(f"unsupported allocator_mode: {allocator_mode}")
+
+
+def snapshot(
+    seed: int,
+    n_uavs: int,
+    n_resources: int,
+    advantage_db: float,
+    curves,
+    *,
+    pairing_mode: str = MAIN_PAIRING_MODE,
+    allocator_mode: str = MAIN_ALLOCATOR_MODE,
+    channel: str = "measured_a2a",
+) -> dict[str, float | int | str]:
+    if pairing_mode not in SUPPORTED_PAIRING_MODES:
+        raise ValueError(f"unsupported pairing_mode: {pairing_mode}")
+    if allocator_mode not in SUPPORTED_ALLOCATOR_MODES:
+        raise ValueError(f"unsupported allocator_mode: {allocator_mode}")
+
+    cfg = SwarmConfig(n_uavs=n_uavs, seed=seed, channel=channel)
     rng = np.random.default_rng(seed)
     positions = generate_equal_altitude_positions(cfg, rng)
-    pairs = build_disjoint_pairs(n_uavs)
+    pairs = build_pairs(positions, pairing_mode)
     tx_pos = np.array([positions[t] for t, _ in pairs])
     rx_pos = np.array([positions[r] for _, r in pairs])
-    resources = (
-        np.zeros(len(pairs), dtype=int)
-        if n_resources == 1
-        else weighted_conflict_graph_allocation(tx_pos, rx_pos, n_resources).resources
-    )
+    resources = allocate_resources(tx_pos, rx_pos, n_resources, allocator_mode, seed)
     partition = prb_partition(n_resources)
     desired_gain = 10.0 ** ((advantage_db / 2.0) / 10.0)
     interference_gain = 10.0 ** ((-advantage_db / 2.0) / 10.0)
@@ -86,6 +143,7 @@ def snapshot(seed: int, n_uavs: int, n_resources: int, advantage_db: float, curv
     goodputs: list[float] = []
     dominant_fractions: list[float] = []
     n_interferers: list[int] = []
+    desired_distances_m: list[float] = []
     failure_labels: list[str] = []
     unsupported = 0
 
@@ -93,10 +151,10 @@ def snapshot(seed: int, n_uavs: int, n_resources: int, advantage_db: float, curv
         resource_id = int(resources[i])
         n_prb = partition[resource_id]
         grid = grid_for_prbs(n_prb)
-        occupied_bandwidth_hz = cfg.bandwidth_mhz * 1e6 * (n_prb / TOTAL_PRB)
-        noise_w = float(dbm_to_w(thermal_noise_dbm(occupied_bandwidth_hz, cfg.noise_figure_db)))
+        noise_bw_hz = occupied_bandwidth_hz(n_prb, grid.scs_khz)
+        noise_w = float(dbm_to_w(thermal_noise_dbm(noise_bw_hz, cfg.noise_figure_db)))
 
-        signal_w, _, _ = received_power_w(tx, rx, positions, cfg)
+        signal_w, desired_distance_m, _ = received_power_w(tx, rx, positions, cfg)
         signal_w *= desired_gain
         interferers: list[float] = []
         for j, (other_tx, _) in enumerate(pairs):
@@ -130,9 +188,14 @@ def snapshot(seed: int, n_uavs: int, n_resources: int, advantage_db: float, curv
         goodputs.append(goodput)
         dominant_fractions.append(dominant_fraction)
         n_interferers.append(len(interferers))
+        desired_distances_m.append(float(desired_distance_m))
 
     failed = max(len(failure_labels), 1)
     return {
+        "pairing_mode": pairing_mode,
+        "allocator_mode": allocator_mode,
+        "channel": channel,
+        "mean_desired_distance_m": float(np.mean(desired_distances_m)),
         "mean_sinr_db": float(np.mean(sinrs)),
         "mean_first_tx_success": float(np.mean(successes)),
         "mean_expected_goodput_mbps": float(np.mean(goodputs)),
@@ -185,7 +248,6 @@ def main() -> None:
     if args.require_full_curves and curve_mode != "FULL_5GLENA_V5_LOCAL":
         raise RuntimeError("publication campaign requires locally prepared official 5G-LENA v5.0 full Table-1 curves")
 
-    # The bundled fixture is intentionally limited; smoke validates the supported R=1 path.
     ns = [5, 20] if args.smoke else N_VALUES
     rs = [1] if args.smoke else RESOURCE_COUNTS
     gs = [0.0, 6.0] if args.smoke else ADVANTAGES_DB
@@ -201,7 +263,15 @@ def main() -> None:
         for r in rs:
             for g in gs:
                 for seed in seeds:
-                    metrics = snapshot(seed, n, r, g, curves)
+                    metrics = snapshot(
+                        seed,
+                        n,
+                        r,
+                        g,
+                        curves,
+                        pairing_mode=MAIN_PAIRING_MODE,
+                        allocator_mode=MAIN_ALLOCATOR_MODE,
+                    )
                     rows.append({
                         "n_uavs": n,
                         "n_resources": r,
@@ -211,6 +281,7 @@ def main() -> None:
                         "cochannel_interference_gain_db": -g / 2.0,
                         "seed": seed,
                         "curve_mode": curve_mode,
+                        "occupied_bandwidth_mode": "PRB_SUBCARRIER_OCCUPANCY",
                         **metrics,
                     })
 
@@ -220,6 +291,7 @@ def main() -> None:
         raise RuntimeError("full publication grid contains links without a sourced same-MCS/base-graph BLER curve")
 
     metric_columns = [
+        "mean_desired_distance_m",
         "mean_sinr_db",
         "mean_first_tx_success",
         "mean_expected_goodput_mbps",
@@ -240,6 +312,9 @@ def main() -> None:
             "n_resources": int(r),
             "prb_partition": "+".join(str(x) for x in prb_partition(int(r))),
             "directional_relative_advantage_db": float(g),
+            "pairing_mode": MAIN_PAIRING_MODE,
+            "allocator_mode": MAIN_ALLOCATOR_MODE,
+            "occupied_bandwidth_mode": "PRB_SUBCARRIER_OCCUPANCY",
             **summarize_group(group, metric_columns),
         })
     summary = pd.DataFrame(summary_rows)

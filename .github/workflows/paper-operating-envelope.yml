@@ -3,9 +3,10 @@ name: paper-operating-envelope
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, "paper/**"]
     paths:
       - "simulations/paper_operating_envelope.py"
+      - "simulations/paper_reviewer_sensitivity.py"
       - "src/sidelink/**"
       - "src/swarm_system.py"
       - "src/channel_models/**"
@@ -37,6 +38,8 @@ jobs:
         run: python -m tools.prepare_5glena_v5_bler
       - name: Run full 100-seed publication operating-envelope campaign
         run: python -m simulations.paper_operating_envelope --seeds 100 --require-full-curves
+      - name: Run full 100-seed reviewer sensitivity campaign
+        run: python -m simulations.paper_reviewer_sensitivity --seeds 100 --require-full-curves
       - name: Generate matched-seed effect sizes and key findings
         run: python -m tools.summarize_paper_results
       - name: Record publication evidence and provenance
@@ -69,7 +72,19 @@ jobs:
               },
               'resource_semantics': '133 PRBs exactly partitioned across orthogonal frequency resources; per-resource occupied bandwidth, noise, TBS and LDPC/CBS are recomputed',
               'directionality_semantics': 'relative advantage G is +G/2 dB desired gain and -G/2 dB co-channel interference gain',
-              'statistics': 'matched deterministic seeds; mean-difference normal-approximation 95% CI; Cohen dz; paired t-test',
+              'statistics': 'matched deterministic seeds; Student-t mean-difference 95% CI; deterministic percentile-bootstrap 95% CI; Cohen dz; paired t-test; Wilcoxon signed-rank test',
+              'pairing_mode_primary': 'sequential disjoint index pairs; nearest-neighbour disjoint pairing evaluated separately as reviewer sensitivity',
+              'allocator_mode_primary': 'THIS_WORK weighted conflict graph; matched-seed random allocation evaluated separately as reviewer sensitivity',
+              'occupied_bandwidth_semantics': 'noise bandwidth = allocated PRBs * 12 subcarriers * 30 kHz SCS',
+              'reviewer_sensitivity': {
+                  'allocator_n_values': [10, 50, 100],
+                  'allocator_resource_counts': [2, 4, 8],
+                  'allocator_directional_relative_advantage_db': [0.0, 6.0],
+                  'allocator_modes': ['random', 'weighted_conflict_graph'],
+                  'pairing_n_values': [10, 50, 100],
+                  'pairing_configs': ['R=1,G=0', 'R=8,G=6'],
+                  'pairing_modes': ['sequential', 'nearest_neighbor'],
+              },
               'non_claims': [
                   'not measured swarm RF',
                   'not normative NR sidelink Mode 1/2 scheduling',
@@ -86,8 +101,12 @@ jobs:
           name: paper-operating-envelope-${{ github.sha }}
           path: |
             results/paper_operating_envelope/
+            results/paper_reviewer_sensitivity/
             figures/paper_operating_envelope/
+            figures/paper_reviewer_sensitivity/
             paper/README.md
             paper/MANUSCRIPT.md
+            paper/MANUSCRIPT_SUBMISSION.md
+            REPRODUCIBILITY.md
           if-no-files-found: error
           retention-days: 90
