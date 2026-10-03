@@ -1,6 +1,6 @@
-# Interference Scaling and Cross-Layer Mitigation in 5G NR Sidelink UAV Swarms
+# Interference Scaling, Resource Isolation, and Topology Sensitivity in 5G NR Sidelink UAV Swarms
 
-> **Manuscript status:** research draft. Numerical results below are from the committed 100-seed publication campaign and are simulation/model-derived unless explicitly stated otherwise. This draft does not claim measured swarm RF performance.
+> **Manuscript status:** broad research draft retained for provenance. The authoritative conference-submission narrative is `MANUSCRIPT_SUBMISSION.md`, which incorporates the completed reviewer robustness campaign and topology-sensitive claim corrections. Numerical RF/network results are simulation/model-derived unless explicitly stated otherwise.
 
 ## Abstract
 
