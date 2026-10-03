@@ -17,6 +17,7 @@ Scientific classifications
 """
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import numpy as np
@@ -170,6 +171,11 @@ def summarize(group: pd.DataFrame) -> dict[str, float]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--seeds", type=int, default=100)
+    parser.add_argument("--smoke", action="store_true")
+    args = parser.parse_args()
+
     curves, curve_mode = load_preferred_bler_curves()
     if curve_mode != "FULL_5GLENA_V5_LOCAL":
         raise RuntimeError("reviewer robustness campaign requires official 5G-LENA v5.0 full curves")
@@ -178,10 +184,14 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
 
     rows = []
-    seeds = range(100)
-    for n in ROBUST_N:
-        for r in ROBUST_R:
-            for g in ROBUST_G:
+    ns = [20, 100] if args.smoke else ROBUST_N
+    rs = [1, 8] if args.smoke else ROBUST_R
+    gs = [0.0, 6.0] if args.smoke else ROBUST_G
+    n_seeds = min(args.seeds, 5) if args.smoke else args.seeds
+    seeds = range(n_seeds)
+    for n in ns:
+        for r in rs:
+            for g in gs:
                 for pairing in PAIRINGS:
                     for allocator in ALLOCATORS:
                         if r == 1 and allocator == "random":
@@ -227,10 +237,10 @@ def main() -> None:
 
     manifest = {
         "classification": "DERIVED_SYSTEM_LEVEL_ROBUSTNESS_CAMPAIGN",
-        "seeds": 100,
-        "swarm_sizes": ROBUST_N,
-        "resource_counts": ROBUST_R,
-        "directional_relative_advantage_db": ROBUST_G,
+        "seeds": n_seeds,
+        "swarm_sizes": ns,
+        "resource_counts": rs,
+        "directional_relative_advantage_db": gs,
         "pairings": PAIRINGS,
         "allocators": ALLOCATORS,
         "link_adaptation": LINK_ADAPTATION,
