@@ -55,14 +55,15 @@ Table I lists the primary publication configuration. The nominal carrier profile
 | PRBs / slot duration | 133 / 0.5 ms | standards-based profile |
 | Tx power | 30 dBm | experimental configuration |
 | Receiver noise figure | 7 dB | experimental configuration |
-| Deployment area | 1000 m x 1000 m | experimental configuration |
+| Deployment area | 1000 m x 1000 m, IID uniform horizontal positions | experimental configuration |
 | UAV altitude | 100 m, equal height | experimental configuration |
-| Activity probability | 1.0 | experimental configuration |
+| Concurrent links | floor(N/2) one-way disjoint Tx-Rx pairs | experimental configuration |
+| Activity probability | 1.0 for all formed links | experimental configuration |
 | Primary pairing | geometry-independent disjoint index pairs | THIS_WORK control regime |
 | Primary R>1 allocator | weighted conflict graph | THIS_WORK |
 | Monte Carlo seeds | 100 matched deterministic seeds | experiment design |
 
-Because UAV positions are independently randomized for each seed while index pairs are fixed, the primary pairing is geometry-independent and its desired-link distance distribution remains approximately stable as N changes. This is useful for isolating density-driven interference growth, but it is not asserted to represent all swarm traffic patterns. Section 5.6 therefore repeats selected cases with nearest-neighbour disjoint pairing.
+For each snapshot, UAV horizontal coordinates are sampled IID uniformly in the fixed 1 km x 1 km area, all UAVs share 100 m altitude, and floor(N/2) disjoint one-way links transmit simultaneously. Because UAV positions are independently randomized for each seed while index pairs are fixed, the primary pairing is geometry-independent and its desired-link distance distribution remains approximately stable as N changes. This is useful for isolating density-driven interference growth, but it is not asserted to represent all swarm traffic patterns. Section 5.6 therefore repeats selected cases with nearest-neighbour disjoint pairing.
 
 ### 3.3 BLER evidence
 
