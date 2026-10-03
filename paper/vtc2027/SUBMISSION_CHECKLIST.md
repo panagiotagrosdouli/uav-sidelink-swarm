@@ -22,10 +22,10 @@
 - [x] No missing or unused citation keys in the audited source.
 - [x] AI-editing disclosure aligned with the VTC policy.
 - [x] Figures regenerate from committed CSV extracts.
-- [ ] Final branch CI confirms exactly 5 pages.
-- [ ] Final branch CI confirms no overfull boxes.
-- [ ] Final branch CI confirms no undefined citations/references.
-- [ ] Final PDF rendered and visually inspected after the audit merge.
+- [x] Final audited branch CI confirms exactly 5 pages.
+- [x] Final audited branch CI confirms no overfull boxes.
+- [x] Final audited branch CI confirms no undefined citations/references.
+- [x] Final PDF rendered at 180 dpi and visually inspected after the audit merge; no clipping, overlap, or broken glyphs found.
 
 ## Human confirmation before upload
 
