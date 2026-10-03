@@ -1,0 +1,71 @@
+name: vtc2027-paper
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "paper/vtc2027/**"
+      - ".github/workflows/vtc2027-paper.yml"
+  push:
+    branches: [main]
+    paths:
+      - "paper/vtc2027/**"
+      - ".github/workflows/vtc2027-paper.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate paper figures
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas matplotlib pypdf
+          python paper/vtc2027/make_figures.py
+
+      - name: Compile IEEE paper
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          working_directory: paper/vtc2027
+          args: -pdf -interaction=nonstopmode -halt-on-error -file-line-error
+
+      - name: Verify five-page limit
+        run: |
+          python - <<'PY'
+          from pypdf import PdfReader
+          path = "paper/vtc2027/main.pdf"
+          pages = len(PdfReader(path).pages)
+          if pages != 5:
+              raise SystemExit(f"Expected exactly 5 pages, got {pages}")
+          print(f"{path}: {pages} pages")
+          PY
+
+      - name: Reject overfull boxes
+        run: |
+          if grep -q "Overfull \\\\hbox" paper/vtc2027/main.log; then
+            grep "Overfull \\\\hbox" paper/vtc2027/main.log
+            exit 1
+          fi
+
+      - name: Upload compiled submission artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VTC2027-Spring-UAV-Sidelink-Draft
+          path: |
+            paper/vtc2027/main.pdf
+            paper/vtc2027/main.tex
+            paper/vtc2027/sections/
+            paper/vtc2027/references.tex
+            paper/vtc2027/make_figures.py
+            paper/vtc2027/data/
+            paper/vtc2027/README.md
+            paper/vtc2027/SUBMISSION_CHECKLIST.md
+          if-no-files-found: error
+          retention-days: 90
