@@ -106,7 +106,7 @@ The campaign evaluates N={5,10,20,30,50,75,100} UAVs. Each full (N,R,G) point us
 
 A separate robustness campaign, which does not overwrite the frozen main evidence, tests four modeling choices: (i) sequential versus nearest-neighbour disjoint pairing; (ii) weighted conflict-graph versus seeded random allocation; (iii) adaptive expected-goodput-maximizing MCS versus a fixed MCS-4 baseline; and (iv) exact PRB occupied-noise bandwidth rather than nominal-channel-share noise bandwidth. The robustness grid uses N={20,50,100}, R={1,4,8}, and G={0,6} dB with matched deterministic seeds. These checks are intended to establish whether the qualitative density/interference conclusions depend on one convenient abstraction.
 
-Numerical robustness claims must be taken only from a successful committed `paper_robustness` workflow output; this manuscript does not pre-commit to their direction or magnitude.
+The completed robustness claims reported below are taken from the successful committed `paper_robustness` output in workflow run #26 and remain provenance-separated from the baseline operating-envelope table.
 
 ## 4. Metrics and Operating-Envelope Definition
 
