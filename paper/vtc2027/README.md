@@ -1,6 +1,15 @@
 # VTC2027-Spring submission draft
 
-This directory contains the reproducible IEEE-style conference-paper draft:
+This directory contains the reproducible IEEE-style conference-paper draft.
+
+## Paper PDF
+
+The latest CI-verified five-page paper is committed here:
+
+**[VTC2027_Spring_UAV_Sidelink.pdf](VTC2027_Spring_UAV_Sidelink.pdf)**
+
+The PDF is generated from the LaTeX source by GitHub Actions only after citation integrity, undefined-reference, five-page, and overfull-box checks pass.
+
 
 **Interference Scaling, Resource Isolation, and Topology Sensitivity in 5G NR Sidelink UAV Swarms**
 
