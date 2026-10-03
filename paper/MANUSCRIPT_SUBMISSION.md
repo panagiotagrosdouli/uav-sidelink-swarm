@@ -157,7 +157,7 @@ At N=100:
 | 8 | 6 | 0.53 | 0.5292 | 2.229 |
 | 8 | 9 | 3.53 | 0.8050 | 3.493 |
 
-The matched-seed comparison between R=8,G=6 and the R=1,G=0 baseline at N=100 shows a first-transmission success increase of +0.516358 with normal-approximation 95% CI [0.505829, 0.526887] and Cohen dz=9.6122 (n=100). Expected PHY goodput increases by +1.870079 Mbps with normal-approximation 95% CI [1.728555, 2.011603] and dz=2.5899 (n=100). The analysis pipeline additionally reports deterministic paired-bootstrap percentile 95% confidence intervals for the matched differences; these should be used as the primary robustness check for bounded/non-Gaussian metrics in the final formatted paper. Paired t-test p-values are retained in the artifact as secondary diagnostics rather than emphasized as the main evidence. These paired statistics are derived system-level comparisons across identical deterministic seeds.
+The matched-seed comparison between R=8,G=6 and the R=1,G=0 baseline at N=100 shows a first-transmission success increase of +0.516358 with normal-approximation 95% CI [0.505829, 0.526887], paired-bootstrap 95% CI [0.505959, 0.526575], and Cohen dz=9.6122 (n=100). Expected PHY goodput increases by +1.870079 Mbps with normal-approximation 95% CI [1.728555, 2.011603], paired-bootstrap 95% CI [1.720663, 2.005570], and dz=2.5899 (n=100). Paired t-test p-values are retained in the artifact as secondary diagnostics rather than emphasized as the main evidence. These paired statistics are derived system-level comparisons across identical deterministic seeds.
 
 ### 5.5 Evaluated operating envelope
 
