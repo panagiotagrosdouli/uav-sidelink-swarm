@@ -22,7 +22,7 @@ This paper is deliberately narrower than the full project campaign. It does **no
 
 1. **Measurement-grounded, NR-aware system framework.** Large-scale A2A propagation is anchored in the Erdemir et al. 3.5 GHz measurement-derived fit; NR MCS/TBS/LDPC mechanics are standards-based; numerical SINR-to-BLER evidence is sourced from verified 5G-LENA link-level simulation data where available.
 2. **Density-dependent interference-regime characterization.** Quantify SINR, BLER, first-transmission success, expected PHY goodput, and failure composition as swarm size increases.
-3. **Cross-layer operating envelope.** Quantify the interaction among swarm size, orthogonal resource separation, and directional desired/interference advantage, and derive the largest evaluated swarm size satisfying explicit reliability/goodput targets.
+3. **Conditional operating envelope with reviewer robustness.** Quantify the interaction among swarm size, exact resource separation, conflict-aware versus random assignment, directional desired/interference advantage, and peer-pairing locality, and derive an explicitly conditional evaluated operating envelope rather than a universal capacity limit.
 
 ## Paper-specific experiment
 
@@ -33,6 +33,9 @@ Evaluate the Cartesian grid:
 - directional relative advantage `G = [0, 3, 6, 9] dB`
 - 100 deterministic seeds in full mode
 - canonical measurement-derived A2A propagation and NR-aware link evaluation
+- primary geometry-independent disjoint pairing, with nearest-neighbour disjoint pairing as a matched-seed sensitivity
+- primary weighted conflict-graph assignment, with matched-seed random allocation as a baseline
+- occupied noise bandwidth computed exactly from allocated PRBs: `n_PRB × 12 × 30 kHz`
 
 For each `(N,R,G)`, report mean and 95% CI for:
 
@@ -42,7 +45,7 @@ For each `(N,R,G)`, report mean and 95% CI for:
 - Jain fairness where applicable
 - aggregate-vs-dominant interference composition
 
-Derive an **operating envelope** rather than a universal capacity limit. For explicitly declared targets, compute the largest evaluated `N` satisfying the target for each `(R,G)` combination. Targets are experimental engineering policies, not 3GPP requirements.
+Derive an **operating envelope** rather than a universal capacity limit. For explicitly declared targets, compute the largest evaluated `N` satisfying the target for each `(R,G)` combination **under the primary pairing and allocator**. Targets are experimental engineering policies, not 3GPP requirements. Random-allocation and nearest-neighbour-pairing sensitivities are reported separately so the primary envelope is not over-generalized.
 
 ## Primary figures
 
@@ -64,7 +67,7 @@ The broader final campaign at scientific commit `fcae537ef0846b94c0c73ce306e15c4
 
 Numerical claims in `MANUSCRIPT_SUBMISSION.md` are tied to the paper-specific `paper-operating-envelope` frozen experiment and its exact `(N,R,G)` configuration. In particular, the manuscript's baseline and mitigated values must be taken from that paper-specific evidence rather than substituted with superficially similar values from other campaign experiments.
 
-The paper-specific experiment reports, among other results, the `N=100, R=1, G=0` baseline as mean SINR `-23.03 dB`, first-TX success `0.0128`, and expected PHY goodput `0.359 Mbps`; these values belong to the exact-resource operating-envelope experiment and should remain internally consistent with the manuscript.
+The reviewer-hardened paper experiment reports, among other results, the primary `N=100, R=1, G=0` controlled-regime baseline as mean SINR `-23.03 dB`, first-TX success `0.0128`, and expected PHY goodput `0.359 Mbps`. Under nearest-neighbour disjoint pairing with the same N/R/G, first-TX success is `0.4766` and expected goodput is `15.12 Mbps`. This large difference is a required boundary condition: the primary envelope isolates a non-local geometry-independent peer regime and must not be presented as universal local-swarm performance.
 
 Different numerical values from the broader campaign are not necessarily contradictions: they may correspond to different experiment definitions, configurations, or link-evaluation paths. Any comparison across evidence contexts must therefore state the experiment provenance explicitly.
 
@@ -81,7 +84,7 @@ The paper must not claim:
 - exact HARQ IR processing;
 - a universal maximum UAV swarm size.
 
-The directional parameter remains an `EXPERIMENTAL_SWEEP` unless replaced by a separately validated physical beamforming model. Resource algorithms remain `THIS_WORK` abstractions.
+The directional parameter remains an `EXPERIMENTAL_SWEEP` unless replaced by a separately validated physical beamforming model. Resource algorithms and pairing policies remain `THIS_WORK` abstractions. The TBS-aware MCS selection is also a model-based `THIS_WORK` link-adaptation rule, not normative NR AMC.
 
 ## Evidence rule
 
