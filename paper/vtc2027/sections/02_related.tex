@@ -1,0 +1,21 @@
+\section{Related Work and Research Gap}
+Mishra \emph{et al.} use 5G sidelink for cooperative UAV-swarm communication with communication-aware scheduling and multi-hop forwarding \cite{mishra2022cu2x}, while Varonen evaluates NR sidelink suitability and routing-update requirements for internal swarm communication \cite{varonen2024sidelink}. Lau \emph{et al.} derive a general analytical U2U outage model that explicitly captures interference for arbitrary multi-UAV node locations \cite{lau2023outage}. Alam and Moh jointly optimize trajectory, frequency allocation, and routing through multi-agent reinforcement learning \cite{alam2024jtfr}. Giannakoulas \emph{et al.} investigate sidelink for unmanned-platform swarms in challenging, site-specific scenarios \cite{giannakoulas2025uxu}, and Zhang \emph{et al.} focus on synchronization and Doppler-aware sidelink access \cite{zhang2026sync}.
+
+These studies establish the relevance of sidelink, interference, topology, and resource control, but they answer different questions. Our goal is not to propose a new routing or learning optimizer. Instead, we isolate four coupled variables---swarm size, desired-link topology, exact frequency-resource partitioning, and spatial desired/interferer advantage---while retaining NR-aware TBS/LDPC and sourced BLER behavior. The robustness layer is equally important: it checks whether conclusions attributed to density actually survive different pairings, allocators, link adaptation, and noise accounting.
+
+\begin{table}[t]
+\caption{Positioning relative to representative prior work.}
+\label{tab:related}
+\centering
+\scriptsize
+\begin{tabular}{@{}p{0.10\columnwidth}p{0.29\columnwidth}p{0.51\columnwidth}@{}}
+\toprule
+Work & Primary focus & Distinction of this study \\
+\midrule
+\cite{mishra2022cu2x} & Scheduling / multi-hop & Exact PRB/TBS cost and topology controls \\
+\cite{lau2023outage} & Analytical U2U outage & NR-aware BLER/TBS operating region \\
+\cite{alam2024jtfr} & Joint learning control & Mechanisms isolated rather than hidden in optimizer \\
+This work & Controlled system study & Matched topology/allocator/AMC robustness \\
+\bottomrule
+\end{tabular}
+\end{table}
