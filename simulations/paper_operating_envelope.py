@@ -103,7 +103,11 @@ def allocate_resources(
     if allocator_mode == "weighted_conflict_graph":
         return weighted_conflict_graph_allocation(tx_pos, rx_pos, n_resources).resources
     if allocator_mode == "random":
-        return random_allocation(len(tx_pos), n_resources, seed=seed).resources
+        # Use a deterministic but distinct RNG stream from the geometry seed.
+        # This preserves matched reproducibility without coupling the first
+        # random-allocation draws to the position generator's sequence.
+        allocator_seed = int(seed) + 1_000_003
+        return random_allocation(len(tx_pos), n_resources, seed=allocator_seed).resources
     raise ValueError(f"unsupported allocator_mode: {allocator_mode}")
 
 
