@@ -34,11 +34,44 @@ Run the validation suite:
 python -m pytest -q
 ```
 
+## Publication-grade reviewer sensitivity
+
+The publication path now separates the primary operating-envelope grid from
+reviewer-facing robustness checks.
+
+Primary publication command:
+
+```bash
+python -m simulations.paper_operating_envelope --seeds 100 --require-full-curves
+```
+
+Reviewer-sensitivity command:
+
+```bash
+python -m simulations.paper_reviewer_sensitivity --seeds 100 --require-full-curves
+```
+
+The reviewer sensitivity uses matched deterministic seeds to compare:
+
+- random versus weighted conflict-graph resource allocation at fixed N/R/G;
+- sequential disjoint versus nearest-neighbour disjoint pairing at fixed N/R/G.
+
+Headline paired comparisons report Student-t and deterministic percentile-bootstrap
+95% confidence intervals, Cohen dz, paired t-tests, and Wilcoxon signed-rank
+sensitivity checks. These statistics describe repeated simulation seeds and must
+not be interpreted as independent field trials.
+
+For exact resource accounting, receiver thermal-noise bandwidth is computed from
+the allocated PRBs as `n_PRB × 12 × SCS`. For the 133-PRB, 30-kHz profile this
+corresponds to 47.88 MHz of occupied PRB subcarriers; 50 MHz remains the nominal
+channel profile.
+
 ## Automated research workflows
 
 The repository includes GitHub Actions workflows for research execution and evidence generation, including:
 
 - `.github/workflows/final-campaign.yml` — canonical campaign execution, evidence finalization, and scientific audit;
+- `.github/workflows/paper-operating-envelope.yml` — publication grid, reviewer sensitivities, paired statistical synthesis, provenance, and artifact freeze;
 - `.github/workflows/amovfly-public-pair.yml` — public AMOVFLY mobility evidence pipeline.
 
 ## Evidence classes
