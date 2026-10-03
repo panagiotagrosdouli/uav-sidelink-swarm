@@ -12,7 +12,7 @@ Use this file during manuscript editing so wording remains aligned with the curr
 | Goodput | expected PHY goodput under the evaluated model | end-to-end application throughput |
 | Envelope | largest evaluated N satisfying explicit policy thresholds | universal maximum swarm capacity |
 | Statistics | matched deterministic-seed system-level comparisons; normal and paired-bootstrap CIs | independent field trials |
-| Pairing | sequential disjoint baseline; nearest-neighbour robustness sensitivity | operational/3GPP association procedure |
+| Pairing / topology | baseline collapse is conditional on sequential-disjoint long-link topology; nearest-neighbour pairing materially improves the regime | density alone universally causes the reported collapse |
 | Link adaptation | THIS_WORK expected-goodput-maximizing MCS; fixed-MCS robustness baseline | normative 3GPP AMC |
 | Noise bandwidth | frozen run uses nominal-channel PRB-share convention; robustness uses exact PRB occupied bandwidth | claim that both conventions are numerically identical |
 | Mobility | measured telemetry used for trajectory/mobility evidence | measured RF performance inferred from telemetry |
@@ -32,3 +32,7 @@ Historical publication freezes remain in `docs/experiments/` for provenance and 
 ## Reviewer-hardening evidence rule
 
 The `paper_robustness` experiment is supplementary sensitivity evidence and must not silently replace the frozen `paper-operating-envelope` values. Any robustness result cited in a manuscript revision must include its committed workflow/artifact provenance and identify the changed modeling dimension (pairing, allocator, link adaptation, or noise-bandwidth accounting).
+
+## Topology-sensitive headline guardrail
+
+The completed robustness campaign shows that pairing is a first-order variable. At N=100,R=1,G=0, nearest-neighbour pairing changes mean desired-link distance from ~517 m to ~84 m and first-TX success from 0.0128 to 0.4766. Therefore all density-collapse wording must explicitly identify the baseline topology or otherwise state topology dependence.
