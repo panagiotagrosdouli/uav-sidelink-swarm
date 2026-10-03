@@ -52,6 +52,17 @@ Derive an **operating envelope** rather than a universal capacity limit. For exp
 4. Operating-envelope plot: largest evaluated swarm size meeting explicit reliability/goodput targets vs resources and directionality.
 5. Failure-regime composition vs density for baseline and one mitigated configuration.
 
+## Reviewer-facing robustness layer
+
+To address common system-level reviewer concerns without changing the frozen headline experiment, the repository now includes a separate `simulations/paper_robustness.py` campaign. It tests:
+
+- sequential disjoint versus nearest-neighbour disjoint pairing;
+- weighted conflict-graph versus seeded random resource allocation;
+- adaptive expected-goodput-maximizing MCS versus fixed MCS-4;
+- exact PRB occupied-noise bandwidth (`N_PRB × 12 × SCS`) versus the frozen experiment's nominal-channel PRB-share convention.
+
+The robustness campaign is supplementary evidence. Its results must be cited only after a successful committed workflow run and must not be mixed numerically with the frozen operating-envelope tables.
+
 ## Evidence separation
 
 The repository contains two related but distinct evidence contexts that must not be numerically mixed.
