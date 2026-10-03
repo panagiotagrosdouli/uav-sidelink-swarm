@@ -11,7 +11,10 @@ Use this file during manuscript editing so wording remains aligned with the curr
 | Reliability | first-transmission success derived from modeled TB BLER | measured PDR |
 | Goodput | expected PHY goodput under the evaluated model | end-to-end application throughput |
 | Envelope | largest evaluated N satisfying explicit policy thresholds | universal maximum swarm capacity |
-| Statistics | matched deterministic-seed system-level comparisons | independent field trials |
+| Statistics | matched deterministic-seed system-level comparisons; normal and paired-bootstrap CIs | independent field trials |
+| Pairing | sequential disjoint baseline; nearest-neighbour robustness sensitivity | operational/3GPP association procedure |
+| Link adaptation | THIS_WORK expected-goodput-maximizing MCS; fixed-MCS robustness baseline | normative 3GPP AMC |
+| Noise bandwidth | frozen run uses nominal-channel PRB-share convention; robustness uses exact PRB occupied bandwidth | claim that both conventions are numerically identical |
 | Mobility | measured telemetry used for trajectory/mobility evidence | measured RF performance inferred from telemetry |
 
 ## Current canonical evidence
@@ -26,3 +29,6 @@ The authoritative readiness state is `docs/FINAL_READINESS.md` and the successfu
 - Main full-campaign studies: 100 deterministic seeds
 
 Historical publication freezes remain in `docs/experiments/` for provenance and must not override the current readiness gate.
+## Reviewer-hardening evidence rule
+
+The `paper_robustness` experiment is supplementary sensitivity evidence and must not silently replace the frozen `paper-operating-envelope` values. Any robustness result cited in a manuscript revision must include its committed workflow/artifact provenance and identify the changed modeling dimension (pairing, allocator, link adaptation, or noise-bandwidth accounting).
