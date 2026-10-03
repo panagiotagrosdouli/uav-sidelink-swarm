@@ -1,0 +1,86 @@
+\section{Results}
+\subsection{Baseline interference and exact resource partitioning}
+Under sequential-disjoint pairing with one shared resource and $G=0$, mean SINR decreases from $-0.49$~dB at $N=5$ to $-23.03$~dB at $N=100$. At $N=100$, first-TX success is 0.0128 and expected goodput is 0.359~Mbps. Aggregate interference accounts for about 72.4\% of policy-failed links, so this baseline is a many-interferer regime.
+
+Table~\ref{tab:n100} shows that exact resource isolation can improve reliability even after paying the PRB/TBS bandwidth cost. Goodput is not monotonic in $R$: $R=4$ has higher SINR than $R=2$ but less goodput because narrower partitions reduce TBS. With $R=8,G=6$, success reaches 0.5292 and expected goodput 2.229~Mbps. Relative to $R=1,G=0$ at $N=100$, the matched-seed success difference is 0.5164 with paired-bootstrap 95\% CI [0.5060, 0.5266]; the goodput difference is 1.870~Mbps with CI [1.721, 2.006].
+
+\begin{table}[t]
+\caption{Selected $N=100$ baseline operating points.}
+\label{tab:n100}
+\centering
+\footnotesize
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+$(R,G)$ & SINR (dB) & Success & Goodput (Mbps) \\
+\midrule
+$(1,0)$ & $-23.03$ & 0.0128 & 0.359 \\
+$(2,0)$ & $-16.20$ & 0.0749 & 0.668 \\
+$(4,0)$ & $-10.48$ & 0.0775 & 0.572 \\
+$(8,0)$ & $-5.47$ & 0.2049 & 1.042 \\
+$(8,6)$ & $0.53$ & 0.5292 & 2.229 \\
+$(8,9)$ & $3.53$ & 0.8050 & 3.493 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Failure mechanism changes with density}
+The baseline degradation is not only a reduction in mean SINR; the interference composition also changes. At low density a strongest interferer can dominate a failed link, while at high density the sum of many interferers becomes the principal mechanism. At $N=100$ in the baseline, approximately 72.4\% of policy-failed links are classified as aggregate-interference dominated and 27.6\% as dominant-interferer failures. Fig.~\ref{fig:failure} contrasts this density trend with the mitigated $R=8,G=6$ case. This diagnostic motivates resource reuse and spatial selectivity because both act on the interference field before decoding or retransmission.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/failure_regime_comparison.pdf}
+\caption{Failure-regime composition under the baseline and a mitigated configuration. Fractions are conditioned on links below the diagnostic success threshold.}
+\label{fig:failure}
+\end{figure}
+
+\subsection{Topology is a first-order variable}
+The strongest robustness result is pairing sensitivity. At $N=100,R=1,G=0$, sequential pairing produces a 517.20~m mean desired-link distance; nearest-neighbor pairing reduces it to 84.05~m. The corresponding mean SINR changes from $-23.03$ to $-1.75$~dB, success from 0.0128 to 0.4766, and goodput from 0.359 to 15.116~Mbps. Fig.~\ref{fig:topology} shows that this topology advantage persists as the number of resources increases. Hence, "density collapse" is not a topology-independent law: local communication can fundamentally change the desired/interference geometry.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/topology_sensitivity.pdf}
+\caption{Pairing sensitivity at $N=100,G=0$ with adaptive link selection and conflict-graph allocation.}
+\label{fig:topology}
+\end{figure}
+
+\subsection{Topology-conditioned scaling across swarm size}
+The robustness grid also exposes the mechanism across $N$, not only at the $N=100$ endpoint. With one shared resource and $G=0$, sequential pairing keeps the mean desired-link distance near 515--525~m as the swarm grows from 20 to 100 UAVs. Success correspondingly falls from 0.0531 to 0.0128. Under nearest-neighbor pairing, increasing density shortens the mean desired link from 195.3~m at $N=20$ to 84.0~m at $N=100$; shared-resource success remains between 0.5834 and 0.4766 despite the larger number of interferers. Fig.~\ref{fig:topology_scaling} therefore separates two effects that would otherwise be conflated: more simultaneous transmitters increase interference, but denser local topology can simultaneously strengthen the desired link.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/topology_scaling.pdf}
+\caption{Topology-conditioned scaling for $R=1,G=0$. Nearest-neighbor pairing maintains substantially higher first-TX success as $N$ increases.}
+\label{fig:topology_scaling}
+\end{figure}
+
+\subsection{Allocator and link-adaptation robustness}
+Resource coordination adds benefit beyond simply increasing $R$. At $N=100,R=8,G=0$, sequential pairing gives success/goodput 0.2049/1.042~Mbps with the conflict graph versus 0.1463/0.815~Mbps with random allocation. Under nearest-neighbor pairing the corresponding values are 0.9465/10.836 and 0.8824/8.357~Mbps. The result therefore separates the gain from resource multiplicity from the additional gain of geometry-aware reuse.
+
+Link adaptation is also material. At $N=100,R=8,G=6$ with sequential pairing, adaptive MCS yields 0.5292 success and 2.229~Mbps, while fixed MCS-4 yields 0.3309 and 0.722~Mbps. The adaptive result should thus be read as an optimistic system-level control assumption, not normative 3GPP AMC. By contrast, replacing the frozen nominal-channel PRB-share noise convention with exact occupied PRB bandwidth changes SINR by at most 0.113~dB over the overlapping robustness grid and has negligible success/goodput effect.
+
+\begin{table}[t]
+\caption{Reviewer-facing robustness checks at $N=100$.}
+\label{tab:robust}
+\centering
+\scriptsize
+\begin{tabular}{@{}p{0.24\columnwidth}p{0.31\columnwidth}p{0.33\columnwidth}@{}}
+\toprule
+Dimension & Baseline / treatment & Main observation \\
+\midrule
+Pairing, $R=1,G=0$ & sequential $\rightarrow$ nearest & success 0.0128 $\rightarrow$ 0.4766 \\
+Allocator, $R=8,G=0$ & random $\rightarrow$ conflict graph & goodput 0.815 $\rightarrow$ 1.042 Mbps \\
+Link adaptation, $R=8,G=6$ & fixed MCS-4 $\rightarrow$ adaptive & goodput 0.722 $\rightarrow$ 2.229 Mbps \\
+Noise bandwidth & nominal share $\rightarrow$ exact PRB & max $|\Delta\mathrm{SINR}|=0.113$ dB \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Evaluated operating envelope}
+For an explicit engineering policy requiring mean first-TX success $\geq0.10$ and expected goodput $\geq1$~Mbps, Fig.~\ref{fig:envelope} reports the largest \emph{evaluated} $N$ satisfying both targets for each $(R,G)$. The baseline reaches $N=10$; several resource/directionality combinations reach the evaluated $N=100$ boundary. This is not a universal capacity limit, and the topology result above shows why $N$ alone is insufficient to define one.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/operating_envelope.pdf}
+\caption{Baseline evaluated operating envelope under explicit success/goodput policy targets. $G$ is an experimental relative desired/interferer advantage.}
+\label{fig:envelope}
+\end{figure}

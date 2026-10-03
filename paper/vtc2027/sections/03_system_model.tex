@@ -1,0 +1,45 @@
+\section{System Model and Reproducibility}
+\subsection{Propagation and NR link model}
+The large-scale A2A channel uses the 3.5~GHz measurement-derived fit of Erdemir \emph{et al.} \cite{erdemir2023a2a},
+\begin{equation}
+ PL(d)=34.650+10(2.166)\log_{10}(d/1\text{ m}).
+\end{equation}
+Simulated RF values are derived from this fit and are not field measurements. The NR profile uses 50~MHz, 30~kHz SCS, 133 PRBs, and 0.5~ms slots. MCS/TBS/LDPC mechanics follow Release-19 procedures \cite{3gpp38214,3gpp38212}. For each candidate MCS, TBS determines the LDPC base graph and code-block size; BLER is then mapped to the closest same-MCS/base-graph curve from the official 5G-LENA v5.0 dataset \cite{patriciello2019e2e,ferreira2026lena}. Link adaptation is a system-level abstraction that selects the MCS maximizing expected first-transmission delivered bits per slot; a fixed-MCS control is evaluated separately.
+
+\subsection{Topology, resource reuse, and directionality}
+UAVs are uniformly placed over a $1000\times1000$~m horizontal area at 100~m altitude. All disjoint links are simultaneously active. The baseline pairs indices $(0,1),(2,3),\ldots$, so desired-link length is independent of spatial proximity. A robustness control instead greedily forms nearest-neighbor disjoint pairs.
+
+The 133 PRBs are partitioned exactly across $R\in\{1,2,4,8\}$ orthogonal resources: $133$; $67+66$; $34+33+33+33$; and $17+17+17+17+17+16+16+16$. Links on different resources do not interfere; TBS and BLER mapping are recomputed for each partition. The baseline allocator is a weighted geometric conflict-graph heuristic and is compared with seeded random allocation. Directional relative advantage $G\in\{0,3,6,9\}$~dB is modeled as $+G/2$~dB desired gain and $-G/2$~dB co-channel interference gain. It is a sensitivity variable, not a measured beamforming gain.
+
+\begin{table}[t]
+\caption{Baseline study configuration.}
+\label{tab:setup}
+\centering
+\footnotesize
+\begin{tabular}{@{}ll@{}}
+\toprule
+Parameter & Value \\
+\midrule
+Area / altitude & $1000\times1000$ m / 100 m \\
+Carrier / bandwidth / SCS & 3.5 GHz / 50 MHz / 30 kHz \\
+PRBs / slot & 133 / 0.5 ms \\
+Transmit power / noise figure & 30 dBm / 7 dB \\
+Activity & 1.0 (full load) \\
+Swarm sizes & 5, 10, 20, 30, 50, 75, 100 \\
+Resources $R$ & 1, 2, 4, 8 \\
+Directional advantage $G$ & 0, 3, 6, 9 dB \\
+Monte Carlo & 100 matched deterministic seeds \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The main campaign contains 11,200 per-seed realizations and 112 scenario summaries. The robustness campaign uses $N\in\{20,50,100\}$, $R\in\{1,4,8\}$, $G\in\{0,6\}$, both pairing rules, conflict-graph/random allocation, adaptive/fixed-MCS-4 operation, and exact occupied PRB noise bandwidth. All code, seeds, tables, and workflow provenance are committed in the public research artifact.
+
+\subsection{Metrics, statistical design, and evidence separation}
+For each seed we record mean link SINR, first-transmission success derived from modeled transport-block BLER, expected delivered PHY goodput, Jain goodput fairness, desired-link distance, co-channel interferer count, and a failure diagnostic. A failed link is classified as noise-limited when interference-to-noise is below one, dominant-interferer limited when the strongest interferer contributes at least half of aggregate interference, and aggregate-interference limited otherwise. The 0.5 success threshold used only for this diagnostic is a policy choice, not a 3GPP requirement.
+
+All primary comparisons use matched deterministic seeds so that identical geometry is reused across treatment and baseline configurations. We report mean differences, normal-approximation confidence intervals, Cohen's $d_z$, and deterministic paired-bootstrap percentile intervals. The bootstrap result is emphasized for bounded metrics such as success probability. The operating envelope uses a separate explicit engineering policy: mean first-TX success $\geq0.10$ and expected goodput $\geq1$~Mbps. The reported envelope is therefore the largest \emph{evaluated} $N$ satisfying both thresholds, not a universal capacity estimate.
+
+The main operating-envelope campaign and the reviewer-facing robustness campaign are stored separately. This prevents values from different topology/allocator/link-adaptation definitions from being silently mixed. The publication workflow reruns unit tests, prepares the official 5G-LENA curves, executes both 100-seed campaigns, computes paired statistics, and archives the exact manuscript and claim guardrails together with the generated CSV tables.
+
+The audited publication run completed successfully on repository commit \texttt{f224ba9e5f95}. The archived evidence package contains the per-seed tables, scenario summaries, matched comparisons, figures, manuscript snapshot, and a SHA-256 artifact digest. This frozen provenance is intended to make every quantitative claim traceable to a specific code state rather than to an unversioned local run.
