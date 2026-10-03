@@ -1,17 +1,21 @@
 \section{System Model and Reproducibility}
-\subsection{Propagation and NR link model}
+\subsection{Propagation and link abstraction}
 The large-scale A2A channel uses the 3.5~GHz measurement-derived fit of Erdemir \emph{et al.} \cite{erdemir2023a2a},
 \begin{equation}
- PL(d)=34.650+10(2.166)\log_{10}(d/1\text{ m}).
+ PL(d)=34.650+21.66\log_{10}(d/1\text{ m}).
 \end{equation}
-Simulated RF values are derived from this fit and are not field measurements. The NR profile uses 50~MHz channel bandwidth, 30~kHz SCS, 133 PRBs, and 0.5~ms slots; the 133-PRB configuration for 50~MHz/30~kHz is defined in the NR transmission-bandwidth tables \cite{3gpp38104}. Physical-channel mapping, coding/TBS mechanics, and data procedures are based on the NR specifications \cite{3gpp38211,3gpp38212,3gpp38214}.
+Simulated RF values are model-derived, not field measurements. The study profile uses 50~MHz, 30~kHz SCS, 133 PRBs, and 0.5~ms slots; 133 PRBs for 50~MHz/30~kHz is consistent with the NR UE bandwidth table \cite{3gpp38101}. MCS values, TBS quantization, and LDPC segmentation follow NR procedures \cite{3gpp38212,3gpp38214}, but the resource grid is an explicit study profile rather than a complete PSSCH implementation: each slot reserves two control/PSCCH-like symbols and one guard symbol, uses 11 PSSCH symbols, and removes 24 DM-RS RE/PRB. PSFCH, SL-PRS, and detailed first/second-stage SCI RE accounting are not modeled explicitly.
 
-For each candidate MCS, TBS determines the LDPC base graph and code-block size; BLER is then mapped to the closest same-MCS/base-graph curve from the official 5G-LENA v5.0 data used by the artifact. 5G-LENA is an ns-3 NR simulation framework documented in the literature \cite{patriciello2019e2e}; the exact v5.0 software release used here is archived on Zenodo \cite{ferreira2026lena}. Link adaptation in this work selects the available MCS maximizing expected first-transmission delivered bits per slot. It is deliberately treated as a system-level research abstraction rather than as a claim of standards-complete NR adaptation \cite{3gpp38214,garcia2021nrv2x}; a fixed-MCS control is evaluated separately.
+For each candidate MCS, the computed TBS determines base graph and nominal code-block size. The requested code-block size is mapped to the nearest available 5G-LENA curve with the same MCS/base graph; BLER is linearly interpolated in SINR and clamped to the sourced curve endpoints. Transport-block BLER is derived from code-block BLER under an independent-code-block approximation. These are generic NR EESM link-level simulation tables from 5G-LENA \cite{patriciello2019e2e,ferreira2026lena}, not measured UAV or PSSCH-specific BLER data. Link adaptation selects the available MCS maximizing expected first-transmission delivered bits per slot; a fixed-MCS-4 control tests this optimistic instantaneous-SINR assumption.
 
-\subsection{Topology, resource reuse, and directionality}
-UAVs are uniformly placed over a $1000\times1000$~m horizontal area at 100~m altitude. All disjoint links are simultaneously active. The baseline pairs indices $(0,1),(2,3),\ldots$, so desired-link length is independent of spatial proximity. A robustness control instead greedily forms nearest-neighbor disjoint pairs. This separation is motivated by prior evidence that UAV geometry and link distance materially affect interference/outage behavior \cite{lau2023outage}.
+\subsection{Topology and interference controls}
+For swarm size $N$, the simulator forms $\lfloor N/2\rfloor$ one-way disjoint transmitter--receiver links; all formed links transmit simultaneously in each static snapshot and one UAV is unpaired when $N$ is odd. The baseline pairs node indices $(0,1),(2,3),\ldots$, so desired-link distance is independent of proximity. The robustness topology instead globally sorts pairwise distances and greedily selects the shortest non-overlapping pairs; we call this \emph{greedy short-link pairing}, not a standardized association rule.
 
-The 133 PRBs are partitioned exactly across $R\in\{1,2,4,8\}$ orthogonal resources: $133$; $67+66$; $34+33+33+33$; and $17+17+17+17+17+16+16+16$. Links on different abstract resources do not interfere; TBS and BLER mapping are recomputed for each partition. NR sidelink itself defines configured sidelink resources and standardized resource-allocation procedures \cite{garcia2021nrv2x,3gpp38300}; however, the allocator evaluated here is intentionally a transparent research abstraction rather than a standards-complete Mode-1/Mode-2 implementation. The baseline allocator is a weighted geometric conflict-graph heuristic and is compared with seeded random allocation. Directional relative advantage $G\in\{0,3,6,9\}$~dB is modeled as $+G/2$~dB desired gain and $-G/2$~dB co-channel interference gain. It is a sensitivity variable, not a measured beamforming gain.
+The 133 PRBs are partitioned as evenly as possible across $R\in\{1,2,4,8\}$ abstract frequency resources. Different resources are assumed perfectly orthogonal, i.e., no adjacent-channel/inter-carrier leakage is modeled. For $R>1$, the baseline reuse allocator forms the symmetric geometric conflict weight
+\begin{equation}
+ w_{ij}=d^{-2}(\mathrm{Tx}_i,\mathrm{Rx}_j)+d^{-2}(\mathrm{Tx}_j,\mathrm{Rx}_i),
+\end{equation}
+orders links by total conflict weight, and greedily assigns each link to the resource with minimum accumulated same-resource weight. This is a research abstraction, not NR Mode-1/Mode-2 sensing or scheduling \cite{garcia2021nrv2x}. Seeded random assignment is the no-coordination control. Directional relative advantage $G\in\{0,3,6,9\}$~dB is imposed as $+G/2$~dB desired gain and $-G/2$~dB co-channel interference gain; it is a sensitivity variable, not a beamforming model.
 
 \begin{table}[t]
 \caption{Baseline study configuration.}
@@ -24,24 +28,19 @@ Parameter & Value \\
 \midrule
 Area / altitude & $1000\times1000$ m / 100 m \\
 Carrier / bandwidth / SCS & 3.5 GHz / 50 MHz / 30 kHz \\
-PRBs / slot & 133 / 0.5 ms \\
-Transmit power / noise figure & 30 dBm / 7 dB \\
-Activity & 1.0 (full load) \\
-Swarm sizes & 5, 10, 20, 30, 50, 75, 100 \\
-Resources $R$ & 1, 2, 4, 8 \\
-Directional advantage $G$ & 0, 3, 6, 9 dB \\
+Tx power / noise figure & 30 dBm / 7 dB \\
+Grid profile & 133 PRBs; 2 control + 1 guard + 11 PSSCH symbols \\
+Active links per snapshot & $\lfloor N/2\rfloor$, one-way, full load \\
+Swarm sizes $N$ & 5, 10, 20, 30, 50, 75, 100 \\
+Resources $R$ / advantage $G$ & 1, 2, 4, 8 / 0, 3, 6, 9 dB \\
 Monte Carlo & 100 matched deterministic seeds \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The main campaign contains 11,200 per-seed realizations and 112 scenario summaries. The robustness campaign uses $N\in\{20,50,100\}$, $R\in\{1,4,8\}$, $G\in\{0,6\}$, both pairing rules, conflict-graph/random allocation, adaptive/fixed-MCS-4 operation, and exact occupied PRB noise bandwidth. All code, seeds, tables, and workflow provenance are committed in the public research artifact.
+\subsection{Metrics, statistics, and evidence}
+First-TX success probability is $1-\mathrm{TB\!\!\!-BLER}$. Expected PHY goodput is $\mathrm{TBS}\,(1-\mathrm{TB\!\!\!-BLER})/0.5$~ms under one scheduled TB per active link per slot; it excludes queues, higher-layer overhead, retransmission timing, and scheduler idling. Primary treatment comparisons reuse identical seeds/geometries and report paired differences, Cohen's $d_z$, and deterministic paired-bootstrap 95\% intervals.
 
-\subsection{Metrics, statistical design, and evidence separation}
-For each seed we record mean link SINR, first-transmission success derived from modeled transport-block BLER, expected delivered PHY goodput, Jain goodput fairness, desired-link distance, co-channel interferer count, and a failure diagnostic. A failed link is classified as noise-limited when interference-to-noise is below one, dominant-interferer limited when the strongest interferer contributes at least half of aggregate interference, and aggregate-interference limited otherwise. The 0.5 success threshold used only for this diagnostic is a policy choice, not a 3GPP requirement.
+The operating envelope is an explicit engineering-policy summary: a scenario is \emph{mean-policy-qualified} when its scenario-mean first-TX success probability is at least 0.10 and mean expected PHY goodput is at least 1~Mbps. Thresholding uses mean point estimates, not lower confidence bounds, so the reported largest evaluated $N$ is not a capacity guarantee.
 
-All primary comparisons use matched deterministic seeds so that identical geometry is reused across treatment and baseline configurations. We report mean differences, normal-approximation confidence intervals, Cohen's $d_z$, and deterministic paired-bootstrap percentile intervals. The bootstrap result is emphasized for bounded metrics such as success probability. The operating envelope uses a separate explicit engineering policy: mean first-TX success $\geq0.10$ and expected goodput $\geq1$~Mbps. The reported envelope is therefore the largest \emph{evaluated} $N$ satisfying both thresholds, not a universal capacity estimate.
-
-The main operating-envelope campaign and the reviewer-facing robustness campaign are stored separately. This prevents values from different topology/allocator/link-adaptation definitions from being silently mixed. The publication workflow reruns unit tests, prepares the official 5G-LENA curves, executes both 100-seed campaigns, computes paired statistics, and archives the exact manuscript and claim guardrails together with the generated CSV tables.
-
-The audited publication run completed successfully on repository commit \texttt{f224ba9e5f95}. The archived evidence package contains the per-seed tables, scenario summaries, matched comparisons, figures, manuscript snapshot, and a SHA-256 artifact digest. This frozen provenance is intended to make every quantitative claim traceable to a specific code state rather than to an unversioned local run.
+Code, deterministic seed definitions, compact publication extracts, and workflow provenance are versioned in the public repository,\footnote{\url{https://github.com/panagiotagrosdouli/uav-sidelink-swarm}} while full per-seed evidence is archived by the cited GitHub Actions artifact. The audited publication run used commit \texttt{f224ba9e5f95} and stores the manuscript snapshot, generated tables, and artifact digest together.
