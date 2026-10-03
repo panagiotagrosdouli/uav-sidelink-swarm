@@ -16,6 +16,19 @@ This checklist is tied to the current canonical thesis evidence and prevents man
 
 Historical publication runs remain preserved for provenance but are not authoritative for current readiness.
 
+## Current paper-specific evidence
+
+The reviewer-hardening publication workflow completed successfully on commit `f224ba9e5f95a23a088db24479c67461fcf497e6`, workflow run #26 (run ID `37106664614`), artifact ID `11267104157`, digest `sha256:f3e6fe8ffac63168d878447bfd61f297f442a55c20b742e4def0374027350099`.
+
+The 100-seed robustness campaign establishes:
+
+- topology is first-order: at N=100,R=1,G=0, nearest-neighbour pairing changes mean desired distance `517.20 -> 84.05 m`, SINR `-23.03 -> -1.75 dB`, first-TX success `0.0128 -> 0.4766`, and expected goodput `0.359 -> 15.116 Mbps`;
+- conflict-graph allocation outperforms seeded random allocation at N=100,R=8,G=0 for both sequential and nearest-neighbour pairing;
+- fixed MCS-4 is materially below the adaptive-MCS abstraction at N=100,R=8,G=6;
+- exact PRB occupied-noise bandwidth has negligible impact on the overlapping interference-dominated grid (max SINR shift `0.113 dB`).
+
+Therefore the manuscript must frame density effects as topology-conditioned rather than universal.
+
 ## Headline evidence
 
 At `N=100`, the canonical publication evidence reports the baseline `R=1, G=0 dB` and mitigated `R=8, G=6 dB` cases as:
