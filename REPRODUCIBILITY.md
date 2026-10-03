@@ -57,6 +57,12 @@ Important quantities are explicitly classified using provenance categories such 
 
 This separation is intended to prevent simulated or derived results from being presented as field measurements or standards-defined performance.
 
+## Reviewer robustness campaign
+
+A separate `simulations/paper_robustness.py` campaign is used to test whether the paper's qualitative conclusions depend on specific system-level abstractions. It varies pairing, resource allocation, link adaptation, and noise-bandwidth accounting while preserving the measurement-derived A2A model and official 5G-LENA v5.0 BLER evidence.
+
+Smoke validation is executed on pull requests. The publication workflow executes the full 100-seed robustness grid and uploads `results/paper_robustness/` with the paper artifact. These results supplement rather than overwrite the frozen operating-envelope evidence.
+
 ## Scientific limitations
 
 The repository does not claim a bit-accurate NR sidelink PHY, measured multi-UAV RF interference/PDR, normative Mode-1/Mode-2 scheduling, full MIMO/beam management, or a universal maximum UAV swarm size.

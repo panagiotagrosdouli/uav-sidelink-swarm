@@ -52,6 +52,10 @@ Before venue formatting:
 - separate implemented mechanisms from design implications in Discussion;
 - keep limitations adjacent to the strongest system-level claims;
 - verify references against the project's literature evidence before submission;
+- run and audit the reviewer-facing robustness campaign;
+- check that pairing, allocator, link-adaptation, and noise-bandwidth sensitivity do not invalidate any headline claim;
+- report paired-bootstrap confidence intervals for the main matched-seed comparisons;
+- include the compact system-parameter table in the final IEEE version;
 - only then apply venue-specific page/template constraints.
 
 ## Final gate

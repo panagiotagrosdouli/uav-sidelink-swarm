@@ -88,8 +88,11 @@ def main() -> None:
     for _, row in e.iterrows():
         lines.append(
             f"- Matched-seed R=8,G=6 vs baseline at N={max_n}, metric `{row.metric}`: "
-            f"mean difference {row.mean_difference:.4g}, 95% CI [{row.ci95_low:.4g}, {row.ci95_high:.4g}], "
-            f"Cohen dz={row.cohen_dz:.2f}, paired-t p={row.paired_t_pvalue:.3g}.\n"
+            f"mean difference {row.mean_difference:.4g}, normal 95% CI "
+            f"[{row.ci95_low:.4g}, {row.ci95_high:.4g}], paired-bootstrap 95% CI "
+            f"[{row.bootstrap_ci95_low:.4g}, {row.bootstrap_ci95_high:.4g}], "
+            f"Cohen dz={row.cohen_dz:.2f}. Paired-t p={row.paired_t_pvalue:.3g} "
+            f"is retained as a secondary diagnostic rather than the primary evidence.\n"
         )
     (BASE / "paper_key_findings.md").write_text("".join(lines), encoding="utf-8")
     print(effects.to_string(index=False))
