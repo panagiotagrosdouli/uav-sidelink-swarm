@@ -1,59 +1,83 @@
 # Submission readiness audit
 
-This checklist is tied to the current canonical thesis evidence and prevents manuscript claims from drifting away from the successful final campaign.
+This gate separates the broader thesis campaign from the paper-specific publication evidence.
 
-## Canonical evidence
+## Broader thesis evidence
 
-- Canonical scientific commit: `fcae537ef0846b94c0c73ce306e15c406ab542f7`
+- Canonical thesis scientific commit: `fcae537ef0846b94c0c73ce306e15c406ab542f7`
 - Final-thesis-campaign: run #5
-- Workflow conclusion: `success`
 - Registered experiments: `18/18 successful`
 - Canonical figures: `17/17 present`
 - Scientific audit checks: `304`
 - Scientific audit failures: `0`
-- Missing external/optional evidence: `0`
-- Main full-campaign Monte-Carlo studies: `100 deterministic seeds`
 
-Historical publication runs remain preserved for provenance but are not authoritative for current readiness.
+These results provide background context. They are not automatically the numerical source for the paper.
 
-## Headline evidence
+## Reviewer-hardened publication evidence
 
-At `N=100`, the canonical publication evidence reports the baseline `R=1, G=0 dB` and mitigated `R=8, G=6 dB` cases as:
+The paper-specific source is the `paper-operating-envelope` publication workflow, with exact metadata recorded in `docs/experiments/013_reviewer_hardened_publication_evidence.md`.
 
-- mean SINR: `-23.03 -> 0.53 dB`;
-- mean first-transmission success: `0.013 -> 0.529`;
-- mean expected PHY goodput: `0.359 -> 2.229 Mbps`.
+Primary N=100 controlled-regime evidence:
 
-The matched-seed comparison over 100 deterministic seeds gives:
+- R=1,G=0: mean SINR `-23.03 dB`, first-TX success `0.0128`, expected PHY goodput `0.359 Mbps`;
+- R=8,G=6: mean SINR `0.53 dB`, first-TX success `0.5292`, expected PHY goodput `2.229 Mbps`.
 
-- first-transmission success difference: `+0.516358`, 95% CI `[0.505829, 0.526887]`, Cohen `dz=9.6122`, paired-t `p=1.4474e-99`;
-- expected PHY goodput difference: `+1.870079 Mbps`, 95% CI `[1.728555, 2.011603]`, Cohen `dz=2.5899`, paired-t `p=6.9415e-46`.
+Matched R=8,G=6 minus R=1,G=0 effects over 100 deterministic seeds:
 
-These are `DERIVED_SYSTEM_LEVEL_METRIC_MATCHED_SEED_COMPARISON` results, not measurements.
+- first-TX success: `+0.516362`; Student-t 95% CI `[0.505703, 0.527021]`; bootstrap 95% CI `[0.505738, 0.526751]`; Cohen `dz=9.61`; Wilcoxon `p=3.90e-18`;
+- expected PHY goodput: `+1.870088 Mbps`; Student-t 95% CI `[1.726815, 2.013360]`; bootstrap 95% CI `[1.716869, 2.003005]`; `dz=2.59`; Wilcoxon `p=4.34e-17`.
+
+## Required boundary-condition evidence
+
+### Allocation
+
+At N=100,G=0, matched random allocation versus the primary conflict-graph allocator must remain visible in the manuscript. For R=8:
+
+- random: success `0.1463`, goodput `0.815 Mbps`;
+- conflict graph: success `0.2049`, goodput `1.042 Mbps`;
+- matched success difference: `+0.0586`, bootstrap 95% CI `[0.0510, 0.0658]`;
+- matched goodput difference: `+0.226 Mbps`, bootstrap 95% CI `[0.186, 0.268]`.
+
+Therefore the R=8,G=0 crossing of the 1 Mbps policy target is not attributed to resource partitioning alone.
+
+### Pairing
+
+At N=100,R=1,G=0:
+
+- primary geometry-independent pairing: mean desired distance `517.2 m`, success `0.0128`, goodput `0.359 Mbps`;
+- nearest-neighbour pairing: mean desired distance `84.0 m`, success `0.4766`, goodput `15.12 Mbps`;
+- matched success difference: `+0.4637`, bootstrap 95% CI `[0.4539, 0.4736]`.
+
+Therefore the primary envelope is a controlled non-local-peer regime and not a universal local-swarm capacity statement.
 
 ## Claim-preserving requirements
 
-1. Describe the A2A propagation law as a fitted measurement-derived large-scale model; simulated RF values are model-derived.
-2. Describe 5G-LENA BLER as `LINK_LEVEL_SIMULATION` evidence, not 3GPP-standard BLER curves or UAV measurements.
-3. Describe the conflict-graph allocator as a `THIS_WORK` system-level abstraction, not normative NR Sidelink Mode 1/2 scheduling.
-4. Describe `G` as an experimental relative desired/interferer sensitivity (`+G/2` desired and `-G/2` interference), not measured beamforming gain or full MIMO.
-5. Describe reliability as first-transmission success derived from modeled TB BLER, not measured PDR.
-6. Describe goodput as expected PHY goodput under the evaluated model, not end-to-end application throughput.
-7. Describe the operating envelope as the largest **evaluated** swarm size satisfying explicit policy thresholds, not a universal capacity limit.
-8. Do not introduce unsupported claims about measured swarm RF interference, measured PDR/BLER, end-to-end latency, full fast fading, or beam tracking.
-9. Treat AMOVFLY telemetry as mobility/trajectory evidence unless user-supplied raw data support an additional analysis.
+1. A2A propagation is a fitted measurement-derived large-scale model; simulated RF values are model-derived.
+2. 5G-LENA BLER is `LINK_LEVEL_SIMULATION` evidence, not 3GPP-standard BLER data or UAV measurements.
+3. Conflict-graph allocation is `THIS_WORK`, not normative Mode 1/2.
+4. Directional `G` is an experimental desired/interferer relative advantage, not measured beamforming gain or full MIMO.
+5. Reliability means modeled first-transmission success, not measured PDR.
+6. Goodput means expected PHY goodput under the model, not end-to-end application throughput.
+7. The envelope is the largest **evaluated** N under explicit policy thresholds and explicit topology/allocation assumptions.
+8. Pairing locality must be stated whenever interpreting density scaling.
+9. TBS-aware MCS selection is a `THIS_WORK` informed link-adaptation abstraction, not normative AMC.
+10. Full fast fading, measured swarm RF, measured PDR/BLER/latency, and beam tracking are not claimed.
 
-## Editorial gate
+## Editorial and release gate
 
-Before venue formatting:
+Before upload:
 
-- ensure all numerical claims match the current final campaign;
-- include the matched-seed confidence intervals and effect sizes in Results;
-- separate implemented mechanisms from design implications in Discussion;
-- keep limitations adjacent to the strongest system-level claims;
-- verify references against the project's literature evidence before submission;
-- only then apply venue-specific page/template constraints.
+- all manuscript numbers must match the final hardened artifact;
+- use a compact system-parameter table in the paper;
+- effect magnitudes and confidence intervals must receive more emphasis than tiny p-values;
+- references must be verified against publisher/DOI records;
+- venue-specific formatting must be applied only after scientific content is frozen;
+- final authorship/order, affiliations, corresponding-author details, funding/acknowledgements, and repository license require human confirmation;
+- supervisor/co-author approval is required;
+- a final rendered-PDF visual and reference audit is required.
 
-## Final gate
+See also `paper/REVIEWER_READINESS.md` and GitHub issue #30.
 
-The scientific implementation and reproducibility package is ready for thesis/research handoff. Further scientific changes that affect results must create a new campaign commit and evidence record rather than silently modifying the frozen state.
+## Status
+
+The implementation is reviewer-hardened, but **submission-ready status is granted only after the final publication workflow associated with the synchronized manuscript succeeds and its artifact is recorded in the evidence freeze**.
