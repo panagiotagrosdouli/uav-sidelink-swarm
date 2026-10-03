@@ -55,10 +55,12 @@ jobs:
         run: python -m simulations.ablation_study --smoke
       - name: Smoke-test paper operating envelope
         run: python -m simulations.paper_operating_envelope --smoke
+      - name: Smoke-test paper reviewer sensitivity
+        run: python -m simulations.paper_reviewer_sensitivity --smoke
       - name: Validate reproducible thesis registry
         run: python -m tools.run_thesis_pipeline --dry-run --smoke
       - name: Validate campaign and paper tooling syntax
-        run: python -m py_compile tools/finalize_campaign.py tools/prepare_5glena_v5_bler.py tools/summarize_paper_results.py src/sidelink/adaptive_tb.py simulations/paper_operating_envelope.py
+        run: python -m py_compile tools/finalize_campaign.py tools/prepare_5glena_v5_bler.py tools/summarize_paper_results.py src/sidelink/adaptive_tb.py src/statistical_tests.py simulations/paper_operating_envelope.py simulations/paper_reviewer_sensitivity.py
       - name: Upload scientific outputs
         uses: actions/upload-artifact@v4
         with:
