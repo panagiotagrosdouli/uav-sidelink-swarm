@@ -21,18 +21,18 @@ orders links by total conflict weight, and greedily assigns each link to the res
 \caption{Baseline study configuration.}
 \label{tab:setup}
 \centering
-\footnotesize
-\begin{tabular}{@{}ll@{}}
+\scriptsize
+\begin{tabular}{@{}p{0.36\columnwidth}p{0.56\columnwidth}@{}}
 \toprule
 Parameter & Value \\
 \midrule
 Area / altitude & $1000\times1000$ m / 100 m \\
 Carrier / bandwidth / SCS & 3.5 GHz / 50 MHz / 30 kHz \\
 Tx power / noise figure & 30 dBm / 7 dB \\
-Grid profile & 133 PRBs; 2 control + 1 guard + 11 PSSCH symbols \\
+Grid profile & 133 PRBs; 2 control + 1 guard; 11 PSSCH symbols \\
 Active links per snapshot & $\lfloor N/2\rfloor$, one-way, full load \\
 Swarm sizes $N$ & 5, 10, 20, 30, 50, 75, 100 \\
-Resources $R$ / advantage $G$ & 1, 2, 4, 8 / 0, 3, 6, 9 dB \\
+$R$ / $G$ & 1, 2, 4, 8 / 0, 3, 6, 9 dB \\
 Monte Carlo & 100 matched deterministic seeds \\
 \bottomrule
 \end{tabular}
