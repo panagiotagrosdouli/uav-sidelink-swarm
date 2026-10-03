@@ -14,9 +14,10 @@ Verified on 2026-10-03. This file records the external bibliographic sources use
 | yu2025uavlink | Yu and Jiang, IEEE VTC2025-Fall, pp. 1-5, 2025, DOI 10.1109/VTC2025-Fall65116.2025.11310275 | https://dblp.org/rec/conf/vtc/YuJ25 |
 | zhang2026sync | Zhang et al., *Drones*, 10(4), 304, 2026, DOI 10.3390/drones10040304 | https://www.mdpi.com/2504-446X/10/4/304 |
 | erdemir2023a2a | Erdemir et al., IEEE VTC2023-Spring, 2023, DOI 10.1109/VTC2023-Spring57618.2023.10199853 | https://research.itu.edu.tr/en/publications/measurement-based-channel-characterization-for-a2a-and-a2g-wirele/ |
-| 3gpp38101 | 3GPP TS 38.101-1 V16.22.0, Table 5.3.2-1: 50 MHz / 30 kHz -> 133 RB | https://www.etsi.org/deliver/etsi_TS/138100_138199/13810101/16.22.00_60/ts_13810101v162200p.pdf |
-| 3gpp38212 | 3GPP TS 38.212, multiplexing/channel coding; project implementation targets V19.4.0 | https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=3214 |
-| 3gpp38214 | 3GPP TS 38.214, MCS/TBS/data procedures; project implementation targets V19.4.0 | https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=3216 |
+| 3gpp38101 | 3GPP TS 38.101-1 V19.4.0, Release 19; 50 MHz / 30 kHz uses 133 RB in the NR UE bandwidth table | https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=3366 |
+| 3gpp38211 | 3GPP TS 38.211 V19.4.0, Release 19; NR numerology and physical-channel definitions | https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=3213 |
+| 3gpp38212 | 3GPP TS 38.212 V19.4.0, Release 19; multiplexing/channel coding and LDPC mechanics | https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=3214 |
+| 3gpp38214 | 3GPP TS 38.214 V19.4.0, Release 19; MCS/TBS/data procedures | https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=3216 |
 | patriciello2019e2e | Patriciello et al., *Simulation Modelling Practice and Theory*, 96, 101933, 2019, DOI 10.1016/j.simpat.2019.101933 | https://doi.org/10.1016/J.SIMPAT.2019.101933 |
 | ferreira2026lena | Ferreira et al., *5G-LENA ns-3 nr module*, v5.0.y, Zenodo, 2026, DOI 10.5281/zenodo.21165297 | https://zenodo.org/records/21165297 |
 
