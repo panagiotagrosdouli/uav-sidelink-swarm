@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - "simulations/paper_operating_envelope.py"
+      - "simulations/paper_robustness.py"
       - "src/sidelink/**"
       - "src/swarm_system.py"
       - "src/channel_models/**"
@@ -92,5 +93,7 @@ jobs:
             figures/paper_operating_envelope/
             paper/README.md
             paper/MANUSCRIPT.md
+            paper/MANUSCRIPT_SUBMISSION.md
+            paper/CLAIM_CHECK.md
           if-no-files-found: error
           retention-days: 90
