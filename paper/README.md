@@ -1,5 +1,13 @@
 # Paper track — NR Sidelink UAV Swarm Operating Envelope
 
+## Publication status
+
+**Status: submission draft / research manuscript.**
+
+The material in this directory is prepared for scientific submission and reproducibility review. It is **not currently represented in this repository as an accepted or published IEEE conference/journal paper**, and no publication DOI, proceedings pages, or acceptance record is claimed here.
+
+`VTC2027-Spring` files are venue-planning and manuscript-compression material only. If the work is later accepted or published, this section and `CITATION.cff` should be updated with the formal bibliographic record.
+
 ## Working title
 
 **Interference Scaling and Cross-Layer Mitigation in 5G NR Sidelink UAV Swarms**

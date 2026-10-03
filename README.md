@@ -1,14 +1,37 @@
 # UAV Sidelink Swarm
 
-Research-oriented Python system-level simulation project for **5G NR Sidelink communication inside UAV swarms**.
+**Research software and reproducibility package for 5G NR sidelink communication in UAV swarms.**
 
-## Research objective
+This repository supports a system-level research study of interference scaling, reliability, goodput, resource separation, directional spatial selectivity, HARQ, routing, and mobility in dense UAV networks.
 
-Study how UAV swarm density and mobility affect UAV-to-UAV link quality, interference, reliability, latency, capacity/goodput and network connectivity, then evaluate controlled improvements from resource allocation, routing, link adaptation, HARQ and directional antenna gains.
+| Research metadata | Status |
+|---|---|
+| Project type | Research software / reproducibility package |
+| Research area | 5G/6G, NR sidelink, UAV swarms, wireless networking |
+| Evidence | System-level simulation, published measurement-derived channel models, sourced link-level BLER data, and public mobility telemetry |
+| Canonical campaign | Run #5, 100 deterministic Monte-Carlo seeds for the main full-campaign studies |
+| Manuscript | **Submission draft — not yet a published conference/journal paper** |
+| Working paper title | *Interference Scaling and Cross-Layer Mitigation in 5G NR Sidelink UAV Swarms* |
 
-The scientific pipeline is:
+## Research question
+
+> How does UAV swarm density change the interference regime of NR sidelink, and how far can resource separation and spatial directionality extend the feasible reliability/goodput operating region?
+
+## Research outputs
+
+- [Paper track](paper/README.md)
+- [Submission manuscript](paper/MANUSCRIPT_SUBMISSION.md)
+- [Submission-readiness audit](paper/SUBMISSION_READINESS.md)
+- [Reproducibility guide](REPRODUCIBILITY.md)
+- [Citation metadata](CITATION.cff)
+
+> **Publication status:** the manuscript in this repository is a research draft. A venue outline (including VTC2027-Spring planning material) does not imply acceptance or publication. Until a formal publication record exists, cite the repository/software artifact using `CITATION.cff`.
+
+## Scientific workflow
 
 `SOURCE -> MODEL -> IMPLEMENTATION -> VALIDATION -> EXPERIMENT -> RESULT -> INTERPRETATION -> LIMITATIONS`
+
+The project studies how UAV swarm density and mobility affect UAV-to-UAV link quality, interference, reliability, latency, capacity/goodput, and network connectivity, and evaluates controlled improvements from resource allocation, routing, link adaptation, HARQ, and directional antenna gains.
 
 ---
 
