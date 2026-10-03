@@ -32,7 +32,16 @@ Recent UAV-swarm research has also emphasized joint optimization of trajectory, 
 
 Giannakoulas et al. reported sidelink communication for unmanned-platform swarms in challenging scenarios [5], while Zhang et al. recently addressed UAV-swarm sidelink synchronization and Doppler-related access/synchronization design [6]. These works reinforce that sidelink UAV swarms are an active research area, but they target different protocol and system questions.
 
-The contribution of this paper is therefore not the generic use of sidelink in UAV swarms. It is a reproducible, measurement-grounded and NR-aware characterization of how density, exact resource isolation, and directional selectivity jointly shape the evaluated reliability/goodput operating region.
+A concise comparison of the closest work is shown below. The table is descriptive rather than a quality ranking.
+
+| Work | Main method/question | NR-aware TBS/BLER mechanics | Dense-swarm interference scaling | Explicit resource-bandwidth trade-off | Resource + spatial-selectivity operating envelope |
+|---|---|---:|---:|---:|---:|
+| Mishra et al. [1] | Cooperative C-U2X / multi-hop and scheduling | Different focus | Partial/different focus | No | No |
+| Lau et al. [2] | Analytical U2U outage characterization | No | Yes, analytically | No | No |
+| Varonen [3] | NR sidelink suitability / routing updates | Different focus | Limited | No | No |
+| This work | Controlled system-level operating-region characterization | Yes, sourced/standards-based mechanics | Yes | Yes | Yes |
+
+The contribution of this paper is therefore not the generic use of sidelink in UAV swarms. It is a reproducible, measurement-grounded and NR-aware characterization of how density, exact resource isolation, and directional selectivity jointly shape the evaluated reliability/goodput operating region. The claim is deliberately limited to the evaluated system-level abstractions and does not imply standards-complete NR sidelink behavior.
 
 ## 3. System Model and Scientific Provenance
 
@@ -50,7 +59,7 @@ The evaluated profile uses 3.5 GHz carrier frequency, 50 MHz channel bandwidth, 
 
 ### 3.3 BLER evidence
 
-For each candidate MCS, the computed TBS determines LDPC base graph and nominal code-block size. The request is mapped to the closest sourced 5G-LENA v5.0 curve for the same MCS/base graph, and transport-block BLER is derived from code-block BLER under an independent-code-block approximation.
+For each candidate MCS, the computed TBS determines LDPC base graph and nominal code-block size. The request is mapped to the closest sourced 5G-LENA v5.0 curve for the same MCS/base graph, and transport-block BLER is derived from code-block BLER under an independent-code-block approximation. Link adaptation is a `THIS_WORK` system-level abstraction: for the instantaneous modeled SINR, the implementation selects the available MCS that maximizes expected first-transmission delivered bits per slot. It is not normative 3GPP AMC and assumes idealized instantaneous link-state knowledge. A fixed-MCS robustness check is therefore included in the reviewer-sensitivity campaign.
 
 The canonical publication run used the official CTTC 5G-LENA v5.0 Table-1 source: release short commit `47a3adc2`, DOI `10.5281/zenodo.21165297`, 1,332 sourced curves, BG1/BG2, and MCS 0–28. These numerical curves are **LINK_LEVEL_SIMULATION** evidence; they are neither UAV field measurements nor 3GPP-standard BLER tables.
 
@@ -63,17 +72,41 @@ The 133 PRBs are partitioned as evenly as possible:
 - R=4: 34+33+33+33;
 - R=8: 17+17+17+17+17+16+16+16.
 
-Links on different abstract frequency resources do not interfere in the system model. For every assigned resource, occupied noise bandwidth, TBS, LDPC segmentation, requested CBS, and sourced BLER mapping are recomputed. Resource separation is therefore not modeled as free interference removal while retaining the full 50 MHz payload resource.
+Links on different abstract frequency resources do not interfere in the system model. For every assigned resource, TBS, LDPC segmentation, requested CBS, and sourced BLER mapping are recomputed. In the frozen publication experiment, effective noise bandwidth is scaled by the assigned PRB share of the nominal 50 MHz channel, i.e. `50 MHz × N_PRB/133`. This preserves the original frozen evidence semantics. A separate robustness campaign uses the exact occupied OFDM bandwidth `N_PRB × 12 × 30 kHz` (47.88 MHz for 133 PRBs) to test sensitivity to this approximately 0.19 dB full-band noise-accounting difference. Resource separation is therefore not modeled as free interference removal while retaining the full payload resource.
 
-Resource assignment uses a conflict-graph heuristic developed in this project. It is **THIS_WORK**, not normative NR sidelink Mode-1/Mode-2 scheduling.
+Resource assignment uses a weighted conflict-graph heuristic developed in this project. The weight between links `i` and `j` is a symmetric geometry-only proxy proportional to `1/d(Tx_i,Rx_j)^2 + 1/d(Tx_j,Rx_i)^2`; links are greedily assigned to the resource with minimum accumulated conflict weight. This is **THIS_WORK**, not normative NR sidelink Mode-1/Mode-2 sensing or scheduling. A seeded random allocation is included as a no-coordination robustness baseline at the same `(N,R,G)`.
 
 ### 3.5 Directionality abstraction
 
 The experimental directional relative advantage `G` in {0,3,6,9} dB is implemented as `+G/2` dB on the desired link and `-G/2` dB on co-channel interference. The relative desired/interferer advantage is therefore `G` dB. This is an **EXPERIMENTAL_SWEEP** sensitivity variable, not a measured antenna gain or full MIMO/beam-management model.
 
-### 3.6 Monte Carlo design
+### 3.6 Geometry, traffic activity, and Monte Carlo design
 
-The campaign evaluates N={5,10,20,30,50,75,100} UAVs. Each full (N,R,G) point uses 100 deterministic matched seeds. Transmitter/receiver pairs are disjoint. The full campaign contains 11,200 per-seed realizations and 112 scenario summaries.
+The baseline geometry places UAVs independently and uniformly over a 1000 m × 1000 m horizontal area at a common altitude of 100 m. Carrier frequency is 3.5 GHz, transmit power is 30 dBm, receiver noise figure is 7 dB, and all disjoint links are active simultaneously (activity probability 1.0). The baseline pairing is deterministic index-based disjoint pairing `(0,1),(2,3),...`; it is a controlled topology abstraction, not a claim that operational swarms pair arbitrary nodes this way.
+
+The campaign evaluates N={5,10,20,30,50,75,100} UAVs. Each full (N,R,G) point uses 100 deterministic matched seeds. The full campaign contains 11,200 per-seed realizations and 112 scenario summaries. The same seed is reused across compared `(R,G)` configurations so that geometry is matched.
+
+| Parameter | Baseline value | Scientific status |
+|---|---:|---|
+| Horizontal deployment area | 1000 m × 1000 m | Experimental configuration |
+| Altitude | 100 m | Experimental configuration |
+| Carrier frequency | 3.5 GHz | Study profile / channel-source match |
+| Nominal channel bandwidth | 50 MHz | Study profile |
+| SCS | 30 kHz | Study profile |
+| PRBs | 133 | NR FR1 profile |
+| Tx power | 30 dBm | Experimental configuration |
+| Noise figure | 7 dB | Experimental configuration |
+| Activity probability | 1.0 | Full-load stress configuration |
+| Baseline pairing | Sequential disjoint | THIS_WORK topology abstraction |
+| Baseline resource allocator | Weighted conflict graph | THIS_WORK |
+| Directional relative advantage | 0/3/6/9 dB | Experimental sweep |
+| Seeds per main scenario | 100 | Monte Carlo design |
+
+### 3.7 Reviewer-facing robustness design
+
+A separate robustness campaign, which does not overwrite the frozen main evidence, tests four modeling choices: (i) sequential versus nearest-neighbour disjoint pairing; (ii) weighted conflict-graph versus seeded random allocation; (iii) adaptive expected-goodput-maximizing MCS versus a fixed MCS-4 baseline; and (iv) exact PRB occupied-noise bandwidth rather than nominal-channel-share noise bandwidth. The robustness grid uses N={20,50,100}, R={1,4,8}, and G={0,6} dB with matched deterministic seeds. These checks are intended to establish whether the qualitative density/interference conclusions depend on one convenient abstraction.
+
+Numerical robustness claims must be taken only from a successful committed `paper_robustness` workflow output; this manuscript does not pre-commit to their direction or magnitude.
 
 ## 4. Metrics and Operating-Envelope Definition
 
@@ -124,7 +157,7 @@ At N=100:
 | 8 | 6 | 0.53 | 0.5292 | 2.229 |
 | 8 | 9 | 3.53 | 0.8050 | 3.493 |
 
-The matched-seed comparison between R=8,G=6 and the R=1,G=0 baseline at N=100 shows a first-transmission success increase of +0.516358 with 95% CI [0.505829, 0.526887], Cohen dz=9.6122, paired-t p=1.4474e-99, n=100. Expected PHY goodput increases by +1.870079 Mbps with 95% CI [1.728555, 2.011603], dz=2.5899, paired-t p=6.9415e-46, n=100. These paired statistics are derived system-level comparisons across identical deterministic seeds.
+The matched-seed comparison between R=8,G=6 and the R=1,G=0 baseline at N=100 shows a first-transmission success increase of +0.516358 with normal-approximation 95% CI [0.505829, 0.526887] and Cohen dz=9.6122 (n=100). Expected PHY goodput increases by +1.870079 Mbps with normal-approximation 95% CI [1.728555, 2.011603] and dz=2.5899 (n=100). The analysis pipeline additionally reports deterministic paired-bootstrap percentile 95% confidence intervals for the matched differences; these should be used as the primary robustness check for bounded/non-Gaussian metrics in the final formatted paper. Paired t-test p-values are retained in the artifact as secondary diagnostics rather than emphasized as the main evidence. These paired statistics are derived system-level comparisons across identical deterministic seeds.
 
 ### 5.5 Evaluated operating envelope
 
@@ -155,7 +188,7 @@ The results motivate mechanisms that jointly coordinate resource reuse and explo
 
 ## 7. Limitations
 
-No measured multi-UAV RF interference, BLER, PDR, or end-to-end latency is claimed. The A2A propagation law is measurement-derived, but the simulated geometries and RF realizations are not measurements. Numerical BLER curves are 5G-LENA link-level simulation evidence. The study is not a bit-accurate or standards-complete sidelink PHY/MAC implementation. The conflict-graph resource allocator is a project abstraction rather than normative Mode 1/Mode 2 resource selection. The directional variable is an experimental desired/interferer sensitivity rather than full MIMO, beam tracking, or beam management. Full fast fading is not modeled. Transport-block BLER derived from code-block BLER assumes independent code-block decoding events. The envelope thresholds are explicit engineering-policy choices rather than 3GPP requirements, and the largest evaluated N is not a universal swarm-capacity limit.
+No measured multi-UAV RF interference, BLER, PDR, or end-to-end latency is claimed. The A2A propagation law is measurement-derived, but the simulated geometries and RF realizations are not measurements. Numerical BLER curves are 5G-LENA link-level simulation evidence. The study is not a bit-accurate or standards-complete sidelink PHY/MAC implementation. The conflict-graph resource allocator is a project abstraction rather than normative Mode 1/Mode 2 resource selection. The directional variable is an experimental desired/interferer sensitivity rather than full MIMO, beam tracking, or beam management. Full fast fading is not modeled. Baseline pairing is a deterministic disjoint abstraction and baseline link adaptation uses idealized instantaneous modeled SINR; both are explicitly tested in the separate robustness campaign. Transport-block BLER derived from code-block BLER assumes independent code-block decoding events. The frozen main campaign uses nominal-channel-share noise bandwidth when PRBs are partitioned, while the robustness campaign tests exact PRB occupied bandwidth. The envelope thresholds are explicit engineering-policy choices rather than 3GPP requirements, and the largest evaluated N is not a universal swarm-capacity limit.
 
 ## 8. Conclusion
 
