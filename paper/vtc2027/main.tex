@@ -7,7 +7,7 @@
 \usepackage{url}
 \usepackage{balance}
 
-\title{Interference Scaling, Resource Isolation, and Topology Sensitivity in 5G NR Sidelink UAV Swarms}
+\title{Topology-Conditioned Interference and Resource-Isolation Trade-offs in 5G NR Sidelink UAV Swarms}
 
 \author{\IEEEauthorblockN{Panagiota Grosdouli}
 \IEEEauthorblockA{Department of Electrical and Computer Engineering\\
@@ -18,11 +18,11 @@ Xanthi, Greece}}
 \maketitle
 
 \begin{abstract}
-Direct NR sidelink can support infrastructure-independent UAV-swarm coordination, but its interference regime depends jointly on density, communication topology, resource reuse, and spatial selectivity. We present a reproducible system-level study that combines a published 3.5~GHz air-to-air path-loss fit, 3GPP-derived MCS/TBS/LDPC mechanics under an explicit simplified sidelink resource-grid profile, and generic NR link-level EESM BLER curves processed from the official 5G-LENA v5.0 release. For swarm size $N$, $\lfloor N/2\rfloor$ one-way disjoint links are active per snapshot. A 100-seed campaign evaluates $N\in\{5,10,20,30,50,75,100\}$, partitions a 133-PRB 50~MHz/30~kHz profile over $R\in\{1,2,4,8\}$ abstract orthogonal resources, and tests $G\in\{0,3,6,9\}$~dB desired/interferer relative advantage. Under the full-load sequential-disjoint baseline, $N=100$ yields $-23.03$~dB mean SINR, 0.0128 first-transmission success probability, and 0.359~Mbps expected PHY goodput; $R=8,G=6$ raises the latter metrics to 0.5292 and 2.229~Mbps. A separate 100-seed robustness campaign shows that topology is a first-order determinant in this model: greedy short-link pairing at $N=100,R=1,G=0$ reduces mean desired-link length from 517~m to 84~m and raises success probability to 0.4766. The results therefore characterize topology-dependent, mean-based policy operating regions rather than a universal swarm-capacity limit.
+Direct NR sidelink is a candidate for infrastructure-independent UAV-swarm communication, but dense aerial line-of-sight conditions make scalability depend on more than swarm size alone. We present a measurement-grounded, NR-aware system-level study of communication topology, exact frequency-resource partitioning, and directional desired/interferer selectivity. A 100-seed campaign evaluates $N\in\{5,10,20,30,50,75,100\}$, partitions a 133-PRB profile over $R\in\{1,2,4,8\}$ abstract orthogonal resources, and tests $G\in\{0,3,6,9\}$~dB relative desired/interferer advantage. Under the full-load sequential-disjoint baseline, $N=100$ yields $-23.03$~dB mean SINR, 0.0128 first-transmission success probability, and 0.359~Mbps expected PHY goodput. Yet greedy short-link pairing at the same $N,R=1,G=0$ reduces mean desired-link length from 517~m to 84~m and raises success probability to 0.4766 and goodput to 15.116~Mbps. Resource partitioning and spatial selectivity expand the evaluated reliability--goodput region, but partitioning exhibits a non-monotonic interference/bandwidth trade-off. The results therefore support topology-conditioned operating regions rather than a universal density-only swarm-capacity claim.
 \end{abstract}
 
 \begin{IEEEkeywords}
-5G NR sidelink, UAV swarm, interference, resource allocation, topology, link adaptation, reproducibility.
+5G NR sidelink, UAV swarm, topology, interference, resource isolation, operating region, reproducibility.
 \end{IEEEkeywords}
 
 \input{sections/01_introduction}
