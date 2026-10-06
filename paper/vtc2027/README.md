@@ -1,10 +1,10 @@
-# VTC2027-Spring submission draft
+# IEEE-formatted paper draft
 
-This directory contains the reproducible IEEE-style conference-paper draft.
+This directory contains the reproducible five-page IEEE-style manuscript and its paper-specific QA material.
 
 ## Paper PDF
 
-The currently committed PDF is the last CI-verified five-page build. The topology-first source revision in this branch must be rebuilt by CI before it becomes the new archived submission PDF:
+The currently committed PDF is the CI-verified topology-first five-page build:
 
 **[VTC2027_Spring_UAV_Sidelink.pdf](VTC2027_Spring_UAV_Sidelink.pdf)**
 
@@ -19,9 +19,9 @@ Current author block:
 - Democritus University of Thrace
 - Xanthi, Greece
 
-## Target venue
+## Venue-format context
 
-IEEE VTC2027-Spring, Hamburg, Germany, 20–23 June 2027.
+The source is formatted for IEEE VTC2027-Spring, Hamburg, Germany, 20–23 June 2027. **Formatting for this venue does not mean the manuscript has been submitted or accepted.**
 
 Checked on 2026-10-03 against the official VTC site: regular papers use a 5-page conference format and the regular-paper deadline is 14 October 2026. Venue requirements can change, so recheck the official CFP immediately before upload.
 
@@ -64,8 +64,8 @@ The expected output is exactly 5 pages.
 
 The paper reports system-level simulation/model-derived results. For swarm size `N`, only `floor(N/2)` one-way disjoint links are simultaneously active in a static snapshot. The resource grid, allocator, MCS adaptation, directional advantage, and frequency-resource orthogonality are explicit research abstractions; the paper does not claim measured multi-UAV RF performance, standards-complete Mode-1/Mode-2 scheduling, full fading/beam management, or a universal maximum swarm size.
 
-## Before submission
+## Before any conference submission
 
-Confirm the final author list, corresponding-author email, affiliations, supervisor/co-author approval, and the current VTC submission instructions. Do not add co-authors or contact details unless they have been explicitly confirmed.
+The author list is currently single-author: Panagiota Grosdouli. Before any conference submission, confirm the corresponding-author email, exact affiliation wording, any required institutional review, and the current venue instructions.
 
 The draft includes the venue-required acknowledgment that OpenAI ChatGPT was used as an editing assistant for language, compression, LaTeX formatting, and bibliographic organization. It was not used to generate simulation data; final scientific responsibility remains with the author.
