@@ -1,6 +1,7 @@
 # UAV Sidelink Swarm
 
 **Research software, paper source, and reproducibility package for topology-conditioned interference and resource-isolation studies in 5G NR sidelink UAV swarms.**
+DOI:10.5281/zenodo.23197264
 
 ## Paper
 
