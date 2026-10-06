@@ -27,6 +27,8 @@ A conference submission is **not required** before a Zenodo deposit. The preprin
 - [x] Five-page check passes.
 - [x] Overfull-box check passes.
 - [x] CI-published topology-first PDF exists in the repository.
+- [x] Final PDF independently preflighted: 5 US-Letter pages, openable, unencrypted, fonts embedded, and no clipping/overlap/broken-glyph issue found in the 180-dpi visual render.
+- [x] Latest audited PR-build artifact: `VTC2027-Spring-UAV-Sidelink-Draft`, artifact ID `11441543166`, digest `sha256:fd59ca7b9e039690a3b683c8ef8c74b564ffabf87012f155a9371b87951a13a5`.
 
 ## Recommended Zenodo metadata
 
