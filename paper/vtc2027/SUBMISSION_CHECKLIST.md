@@ -29,10 +29,10 @@
 
 ## Human confirmation before upload
 
-- [ ] Confirm final author list and author order.
+- [x] Final author list confirmed: Panagiota Grosdouli (single author).
 - [ ] Confirm corresponding-author email.
 - [ ] Confirm exact affiliation wording required by the university/supervisor.
-- [ ] Obtain supervisor/co-author approval of the scientific claims and final PDF.
+- [ ] Obtain any supervisor/institutional review required before conference submission.
 - [ ] Recheck the official VTC2027-Spring CFP and submission portal immediately before upload.
 - [ ] Verify track/topic selection in the submission system.
 - [ ] Run final PDF compliance check required by the venue, if provided.
