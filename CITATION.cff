@@ -13,6 +13,9 @@ keywords:
   - UAV communications
   - system-level simulation
   - interference
+  - topology
+  - resource isolation
+  - reliability-goodput operating region
   - resource allocation
   - HARQ
   - routing

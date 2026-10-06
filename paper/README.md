@@ -1,20 +1,20 @@
-# Paper track — NR Sidelink UAV Swarm Operating Envelope
+# Paper — Topology-Conditioned NR Sidelink UAV Swarm Operating Region
 
 ## Publication status
 
-**Status: submission draft / research manuscript.**
+**Status: preprint-ready research manuscript; not peer-reviewed, accepted, or formally published.**
 
 The material in this directory is prepared for scientific submission and reproducibility review. It is **not currently represented in this repository as an accepted or published IEEE conference/journal paper**, and no publication DOI, proceedings pages, or acceptance record is claimed here.
 
-`VTC2027-Spring` files are venue-planning and manuscript-compression material only. If the work is later accepted or published, this section and `CITATION.cff` should be updated with the formal bibliographic record.
+`VTC2027-Spring` contains the current IEEE-formatted five-page source and CI-verified PDF. Formatting for that venue does not mean the manuscript has been submitted or accepted. If a public preprint DOI or formal publication record is created, this section and `CITATION.cff` should be updated.
 
 ## Working title
 
-**Interference Scaling, Resource Isolation, and Topology Sensitivity in 5G NR Sidelink UAV Swarms**
+**Topology-Conditioned Interference and Resource-Isolation Trade-offs in 5G NR Sidelink UAV Swarms**
 
 ## Central research question
 
-> How do swarm density and communication topology change the NR sidelink interference regime, and how far can resource separation and spatial directionality extend the feasible reliability/goodput operating region?
+> How do communication topology and swarm density jointly determine the UAV sidelink interference regime, and when do bandwidth-aware resource isolation and spatial selectivity expand the evaluated reliability/goodput operating region?
 
 This paper is deliberately narrower than the full project campaign. It does **not** attempt to report every implemented experiment.
 
@@ -46,11 +46,11 @@ Derive an **operating envelope** rather than a universal capacity limit. For exp
 
 ## Primary figures
 
-1. Mean SINR / success vs swarm size for selected `(R,G)` configurations.
-2. Heatmap: first-TX success over `(N,R)` for each directional advantage.
-3. Heatmap: expected goodput over `(N,R)` for each directional advantage.
-4. Operating-envelope plot: largest evaluated swarm size meeting explicit reliability/goodput targets vs resources and directionality.
-5. Failure-regime composition vs density for baseline and one mitigated configuration.
+1. Topology-conditioned scaling / pairing sensitivity.
+2. Exact resource-partition trade-off.
+3. Reliability-goodput operating-envelope plot.
+
+The current five-page IEEE version intentionally prioritizes these three figures over the broader thesis figure set.
 
 ## Reviewer-facing robustness layer
 
