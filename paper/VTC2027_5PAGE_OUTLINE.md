@@ -1,56 +1,67 @@
-# VTC2027-Spring — 5-page compression outline
+# VTC2027-Spring — topology-first 5-page compression outline
 
-Target contribution: **measurement-grounded, NR-aware characterization of topology-dependent UAV sidelink interference, exact frequency-resource trade-offs, and directional spatial selectivity.**
+Target contribution: **measurement-grounded, NR-aware characterization of topology-conditioned UAV sidelink interference, exact resource-isolation trade-offs, and a joint reliability/goodput operating region.**
+
+Current CFP deadline checked 2026-10-06: **14 October 2026 (final extension)**.
 
 ## Page budget
 
 ### Page 1 — Abstract + Introduction
 
-Keep the abstract close to 150–180 words. Introduction should establish: (i) NR sidelink relevance to infrastructure-independent UAV swarm coordination; (ii) dense aerial LOS creates strong aggregate interference; (iii) resource isolation trades interference against PRB/TBS bandwidth; (iv) spatial selectivity can complement frequency isolation.
+The first page must establish four ideas quickly:
 
-End the introduction with exactly three contributions:
+1. UAV sidelink scalability is not a function of swarm size alone.
+2. Desired-link topology can fundamentally change the interference regime.
+3. Resource isolation reduces interference but also removes PRBs/TBS from each link.
+4. Spatial selectivity can complement frequency isolation.
+
+State the research gap conservatively: existing work covers sidelink scheduling, analytical U2U outage, joint trajectory/frequency/routing optimization, topology control, and synchronization, but the joint NR-aware characterization of topology sensitivity + explicit resource-bandwidth cost + reliability/goodput operating region remains insufficiently characterized.
+
+End with exactly three contributions:
 
 1. measurement-grounded / NR-aware system evaluation;
-2. topology-conditioned interference characterization, including nearest-neighbour robustness;
-3. exact-resource + directionality operating envelope with random-allocation/fixed-MCS controls.
-
-Do not discuss routing, traffic, AMOVFLY, HARQ details, or thesis-wide experiments here. The topology robustness result is now central and must remain in the 5-page paper.
+2. topology-conditioned interference scaling with matched-seed nearest-neighbour sensitivity;
+3. exact resource + spatial-selectivity operating envelope with allocator/fixed-MCS/bandwidth robustness controls.
 
 ### Page 2 — Related Work + System Model
 
-Include one compact closest-work comparison table and one compact system-parameter table. Explicitly state the 1000 m × 1000 m area, 100 m altitude, 30 dBm Tx power, 7 dB noise figure, full activity, sequential disjoint baseline pairing, weighted conflict-graph allocator, and idealized adaptive-MCS semantics. Mention the separate pairing/random-allocation/fixed-MCS/exact-bandwidth robustness campaign in one sentence.
+Use one compact closest-work table including Mishra, Lau, Varonen, Alam and Moh, and Bai et al. Avoid claiming that topology control itself is novel.
 
-Related work: compress to 4–6 closest references and one paragraph. Contrast against:
-
-- 5G sidelink UAV swarm scheduling/network formation;
-- analytical multi-UAV U2U outage/interference;
-- NR sidelink UAV-swarm suitability/routing;
-- joint trajectory/frequency/routing optimization;
-- recent synchronization-oriented UAV sidelink work.
-
-System model must preserve only the assumptions reviewers need to interpret the results:
+System-model essentials only:
 
 - 3.5 GHz measurement-derived A2A large-scale fit;
 - 50 MHz / 30 kHz / 133 PRBs;
 - standards-based MCS/TBS/LDPC mechanics;
 - official 5G-LENA v5.0 Table-1 link-level BLER curves;
-- exact PRB partitions for R={1,2,4,8};
+- exact PRB partitions R={1,2,4,8};
 - G={0,3,6,9} dB experimental directional relative advantage;
-- N={5,10,20,30,50,75,100}, 100 matched seeds.
+- N={5,10,20,30,50,75,100};
+- 100 matched deterministic seeds;
+- full-load sequential-disjoint baseline plus nearest-neighbour robustness.
 
-Use one compact table for parameters/provenance.
+### Page 3 — Baseline + topology sensitivity
 
-### Page 3 — Baseline density + resource trade-off
+Show the baseline density trend but immediately condition it on topology.
 
-Primary figure candidate: baseline density scaling and failure-regime composition, or a compact two-panel equivalent if the final template allows it.
+Headline baseline at N=100,R=1,G=0:
 
-Headline facts:
+- mean desired distance 517.20 m;
+- mean SINR -23.03 dB;
+- first-TX success 0.0128;
+- expected goodput 0.359 Mbps.
 
-- mean SINR -0.49 dB at N=5 -> -23.03 dB at N=100;
-- at N=100 baseline first-TX success 0.0128, expected goodput 0.359 Mbps;
-- ~72.4% of policy-failed links aggregate-interference dominated at N=100.
+Nearest-neighbour at the same N,R,G:
 
-Then show the exact-resource cost/benefit at N=100:
+- mean desired distance 84.05 m;
+- mean SINR -1.75 dB;
+- first-TX success 0.4766;
+- expected goodput 15.116 Mbps.
+
+Primary interpretation: **density-only statements are not topology invariant**.
+
+### Page 4 — Resource trade-off + joint operating envelope
+
+At N=100,G=0 show:
 
 | R | SINR dB | Success | Goodput Mbps |
 |---:|---:|---:|---:|
@@ -59,59 +70,42 @@ Then show the exact-resource cost/benefit at N=100:
 | 4 | -10.48 | 0.0775 | 0.572 |
 | 8 | -5.47 | 0.2049 | 1.042 |
 
-Emphasize R=2 -> R=4 non-monotonic goodput as evidence that orthogonalization is not free.
+Use R=2 -> R=4 as the key evidence that orthogonalization is not free.
 
-### Page 4 — Cross-layer operating envelope
+Then show the compact operating envelope and one selected matched-seed comparison:
 
-Primary figure candidate: operating-envelope heatmap/table over R and G, plus one selected N=100 comparison.
-
-Frozen envelope under success>=0.10 and expected goodput>=1 Mbps:
-
-| R | G=0 | G=3 | G=6 | G=9 |
-|---:|---:|---:|---:|---:|
-| 1 | 10 | 10 | 20 | 50 |
-| 2 | 50 | 75 | 100 | 100 |
-| 4 | 50 | 75 | 100 | 100 |
-| 8 | 100 | 100 | 100 | 100 |
-
-At N=100, R=8,G=6 versus R=1,G=0:
-
-- success difference +0.516358; 95% CI [0.505829,0.526887]; Cohen dz=9.6122; p=1.4474e-99;
-- expected goodput difference +1.870079 Mbps; 95% CI [1.728555,2.011603]; dz=2.5899; p=6.9415e-46.
-
-State explicitly that N=100 is the evaluated grid boundary, not a universal capacity limit.
+- N=100, R=8,G=6 vs R=1,G=0;
+- success difference +0.516358, 95% CI [0.505829,0.526887];
+- goodput difference +1.870079 Mbps, 95% CI [1.728555,2.011603].
 
 ### Page 5 — Discussion + Limitations + Conclusion + References
 
-Discussion should make only three design points:
+Discussion order:
 
-1. dense swarm failure is aggregate-interference driven;
-2. exact resource separation trades SINR improvement against bandwidth/TBS loss;
-3. frequency isolation and spatial selectivity are complementary and should act before retransmission.
+1. topology is a first-order interference-management variable;
+2. resource partitioning has a real bandwidth/TBS cost;
+3. resource isolation and spatial selectivity are complementary;
+4. retransmission cannot substitute for fixing a fundamentally poor SINR regime.
 
-Limitations in one compact paragraph:
+Limitations must remain adjacent to the claims:
 
 - no measured multi-UAV RF/PDR/BLER/latency;
 - no normative Mode-1/Mode-2 scheduler;
-- no full MIMO/beam management or fast-fading validation;
-- BLER curves are 5G-LENA link-level simulation evidence;
-- envelope thresholds are engineering policy choices.
+- no full MIMO/beam management or fast fading;
+- idealized adaptive-MCS semantics;
+- engineering-policy envelope thresholds;
+- evaluated grid capped at N=100.
 
-Conclusion: one paragraph, no new claims.
+## Figure cap
 
-## Main-paper figure cap
+Prefer exactly 3 main figures:
 
-Prefer 3 main figures, maximum 4:
+1. topology-conditioned density/interference figure;
+2. exact resource-partition trade-off;
+3. reliability/goodput operating-envelope heatmap.
 
-1. density/failure-regime figure;
-2. resource-partition trade-off figure or compact N=100 table;
-3. operating-envelope heatmap;
-4. optional matched-effect / selected cross-layer comparison if space permits.
+A fourth figure should be added only if the IEEE layout remains readable.
 
-## Material intentionally excluded from the 5-page paper
+## Excluded material
 
-Routing, AMOVFLY mobility, traffic queues, ULA physical-array study, full HARQ sweep, full thesis ablation, channel-model comparison, robustness sweeps, and spatial diagnostics remain reproducibility/supporting evidence in the repository but are not needed to establish this paper's central claim.
-
-## Frozen evidence anchor
-
-All quantitative values above trace to canonical scientific commit `9fb112307270d9d39408e704f285ea91d20a735b`, workflow run #3, artifact ID `10005074790`, digest `sha256:4a996afe9dffa7984a5a0cfa6276a6f727228cd1ee2cbbd6e7f1634e8c149137`.
+Keep routing, AMOVFLY mobility, traffic queues, ULA study, full HARQ sweep, thesis-wide ablation, and channel-model comparison in the reproducibility package rather than the 5-page core paper.
