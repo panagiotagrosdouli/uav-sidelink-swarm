@@ -1,326 +1,180 @@
 # UAV Sidelink Swarm
 
-**Research software and reproducibility package for 5G NR sidelink communication in UAV swarms.**
+**Research software, paper source, and reproducibility package for topology-conditioned interference and resource-isolation studies in 5G NR sidelink UAV swarms.**
 
-This repository supports a system-level research study of interference scaling, reliability, goodput, resource separation, directional spatial selectivity, HARQ, routing, and mobility in dense UAV networks.
+## Paper
 
-| Research metadata | Status |
-|---|---|
-| Project type | Research software / reproducibility package |
-| Research area | 5G/6G, NR sidelink, UAV swarms, wireless networking |
-| Evidence | System-level simulation, published measurement-derived channel models, sourced link-level BLER data, and public mobility telemetry |
-| Canonical campaign | Run #5, 100 deterministic Monte-Carlo seeds for the main full-campaign studies |
-| Manuscript | **Submission draft — not yet a published conference/journal paper** |
-| Working paper title | *Interference Scaling and Cross-Layer Mitigation in 5G NR Sidelink UAV Swarms* |
+**Topology-Conditioned Interference and Resource-Isolation Trade-offs in 5G NR Sidelink UAV Swarms**
+
+**Author:** Panagiota Grosdouli  
+**Affiliation:** Department of Electrical and Computer Engineering, Democritus University of Thrace, Xanthi, Greece  
+**Status:** preprint-ready research manuscript; **not peer-reviewed, accepted, or formally published** unless this repository is updated with a publication record.
+
+- [CI-verified 5-page PDF](paper/vtc2027/VTC2027_Spring_UAV_Sidelink.pdf)
+- [IEEE LaTeX source](paper/vtc2027/main.tex)
+- [Full manuscript](paper/MANUSCRIPT_SUBMISSION.md)
+- [Paper evidence and scope](paper/README.md)
+- [Reproducibility guide](REPRODUCIBILITY.md)
+- [Scientific readiness audit](docs/FINAL_READINESS.md)
+- [Citation metadata](CITATION.cff)
+
+> All RF/network performance values are simulation/model-derived unless explicitly identified as measured telemetry. The project does **not** claim measured multi-UAV RF performance.
 
 ## Research question
 
-> How does UAV swarm density change the interference regime of NR sidelink, and how far can resource separation and spatial directionality extend the feasible reliability/goodput operating region?
+> How do communication topology and swarm density jointly determine the UAV sidelink interference regime, and when do bandwidth-aware resource isolation and spatial selectivity expand the evaluated reliability-goodput operating region?
 
-## Research outputs
+The central result is that **swarm size alone is not a sufficient predictor of sidelink scalability**. Desired-link topology can change the operating regime dramatically, while frequency isolation must be evaluated together with its PRB/TBS bandwidth cost.
 
-- [Paper track](paper/README.md)
-- [Submission manuscript](paper/MANUSCRIPT_SUBMISSION.md)
-- [Submission-readiness audit](paper/SUBMISSION_READINESS.md)
-- [Reproducibility guide](REPRODUCIBILITY.md)
-- [Citation metadata](CITATION.cff)
+## Headline results
 
-> **Publication status:** the manuscript in this repository is a research draft. A venue outline (including VTC2027-Spring planning material) does not imply acceptance or publication. Until a formal publication record exists, cite the repository/software artifact using `CITATION.cff`.
+### 1. Topology is a first-order scaling variable
 
-## Scientific workflow
+At `N=100, R=1, G=0`, changing only the pairing topology gives:
 
-`SOURCE -> MODEL -> IMPLEMENTATION -> VALIDATION -> EXPERIMENT -> RESULT -> INTERPRETATION -> LIMITATIONS`
+| Pairing | Mean desired distance | Mean SINR | First-TX success | Expected PHY goodput |
+|---|---:|---:|---:|---:|
+| Sequential disjoint | 517.20 m | -23.03 dB | 0.0128 | 0.359 Mbps |
+| Greedy short-link | 84.05 m | -1.75 dB | 0.4766 | 15.116 Mbps |
 
-The project studies how UAV swarm density and mobility affect UAV-to-UAV link quality, interference, reliability, latency, capacity/goodput, and network connectivity, and evaluates controlled improvements from resource allocation, routing, link adaptation, HARQ, and directional antenna gains.
+**Interpretation:** the severe long-link baseline degradation is not a topology-independent density law.
 
----
+### 2. Resource isolation is not free
 
-# Canonical research results
+At `N=100, G=0`:
 
-The results below are from **canonical research campaign run #5** on Git commit:
-
-`fcae537ef0846b94c0c73ce306e15c406ab542f7`
-
-Run #5 completed successfully with:
-
-- **18/18 registered experiments successful**
-- **17/17 canonical figures present**
-- **304 scientific audit checks**
-- **0 scientific audit failures**
-- **0 missing external/optional evidence**
-- 100 deterministic Monte-Carlo seeds for the main full-campaign studies
-- artifact digest: `sha256:a0dbfbeaa24a371502a584ecf137c65df8a1afd7af23f038ee40ad3cede33e47`
-
-All numerical RF/network results below are simulation/model-derived unless explicitly identified as measured telemetry. They are **not field measurements of swarm RF performance**.
-
-## 1. Swarm density strongly degrades the shared-channel link
-
-In the canonical NR link-performance study, increasing the swarm from 5 to 100 UAVs substantially increases aggregate co-channel interference.
-
-| UAVs | Mean SINR (dB) | Mean BLER | First-TX success | Expected PHY goodput (Mbps) |
-|---:|---:|---:|---:|---:|
-| 5 | -0.49 | 0.651 | 0.349 | 14.106 |
-| 10 | -8.74 | 0.932 | 0.068 | 2.891 |
-| 20 | -13.69 | 0.971 | 0.029 | 1.177 |
-| 30 | -16.06 | 0.977 | 0.023 | 0.910 |
-| 50 | -19.01 | 0.987 | 0.013 | 0.523 |
-| 75 | -21.33 | 0.991 | 0.009 | 0.356 |
-| 100 | -23.03 | 0.994 | 0.006 | 0.248 |
-
-**Interpretation:** under the evaluated full-activity shared-resource configuration, swarm scaling is interference-limited. Link adaptation alone cannot compensate for the interference growth at high density.
-
-Canonical figures: `fig02_sinr_density`, `fig03_sinr_cdf`, `fig04_bler_density`, `fig05_goodput_density`.
-
-## 2. Scaling experiment
-
-For the separate scaling geometry/activity experiment, mean SINR changed from approximately **7.52 dB at N=5** to **-1.75 dB at N=100** in the fixed-area family. The final N=100 95% confidence interval was **[-1.89, -1.61] dB**.
-
-The fixed-density family produced approximately **7.53 dB at N=5** and **-1.75 dB at N=100**, with the same final 95% confidence interval in this evaluated nearest-neighbour/scaling abstraction.
-
-This experiment is a different scenario family from the canonical full-activity NR link-performance table above and should not be numerically conflated with it.
-
-Canonical figure: `fig13_scaling`.
-
-## 3. Resource allocation reduces interference
-
-At **N=50**, increasing the number of abstract orthogonal resources substantially improved the derived PHY performance.
-
-Best evaluated point:
-
-- allocator: `greedy`
-- resources: `8`
-- mean SINR: **-0.62 dB**
-- first-TX success probability: **0.289**
-- mean expected PHY goodput: **1.471 Mbps**
-- Jain goodput fairness: **0.291**
-
-For comparison, the single-resource case produced approximately **-18.97 dB SINR**, **0.011 first-TX success**, and **0.455 Mbps expected PHY goodput**.
-
-The `random`, `greedy` and graph-conflict algorithms are **system-level research abstractions (`THIS_WORK`)**, not normative 3GPP Mode-1/Mode-2 schedulers.
-
-Canonical figure: `fig07_resource_allocation`.
-
-## 4. Directionality / beamforming sensitivity can compensate for interference
-
-At the N=30 sensitivity point, the shared-channel baseline was:
-
-- mean SINR: **-16.06 dB**
-- first-TX success: **0.0225**
-- expected PHY goodput: **0.910 Mbps**
-
-For the experimental `combined` desired-gain + interference-suppression sensitivity:
-
-| Directionality parameter | Mean SINR (dB) | First-TX success | Expected goodput (Mbps) |
+| Resources R | Mean SINR | First-TX success | Expected PHY goodput |
 |---:|---:|---:|---:|
-| 0 dB | -16.06 | 0.023 | 0.910 |
-| 3 dB | -10.06 | 0.056 | 2.314 |
-| 6 dB | -4.06 | 0.183 | 7.439 |
-| 9 dB | 1.94 | 0.481 | 19.771 |
+| 1 | -23.03 dB | 0.0128 | 0.359 Mbps |
+| 2 | -16.20 dB | 0.0749 | 0.668 Mbps |
+| 4 | -10.48 dB | 0.0775 | 0.572 Mbps |
+| 8 | -5.47 dB | 0.2049 | 1.042 Mbps |
 
-The gain values are an **experimental sensitivity sweep**, not measured antenna gains and not a full MIMO/beam-management implementation. The repository also contains a normalized ULA array-factor study as a physical directionality abstraction.
+The `R=2 -> R=4` point is central: SINR improves while expected goodput decreases because additional isolation also reduces the PRBs/TBS available to each link.
 
-Canonical figures: `fig09_beamforming`, `fig16_ula`.
+### 3. Resource isolation and spatial selectivity are complementary
 
-## 5. HARQ helps only when the underlying link is recoverable
+At `N=100`, the sequential baseline `R=8, G=6 dB` reaches:
 
-At **N=100**, the first-transmission TB BLER is approximately **0.995** in the evaluated shared-channel scenario. With the ideal Chase-Combining abstraction and up to four attempts, final success remains only about **0.0101**.
+- mean SINR: **0.53 dB**
+- first-TX success: **0.5292**
+- expected PHY goodput: **2.229 Mbps**
 
-Increasing the feedback/retransmission gap increases latency and reduces delivered goodput:
+Relative to `R=1, G=0` under matched seeds:
 
-| Feedback gap (slots) | Mean latency (ms) | Delivered goodput (Mbps) |
-|---:|---:|---:|
-| 1 | 3.48 | 0.145 |
-| 2 | 4.97 | 0.136 |
-| 4 | 7.95 | 0.127 |
-| 8 | 13.90 | 0.120 |
+- success difference: **+0.516358**, 95% CI **[0.505829, 0.526887]**
+- expected-goodput difference: **+1.870079 Mbps**, 95% CI **[1.728555, 2.011603]**
 
-**Interpretation:** retransmissions cannot by themselves solve a severely interference-limited link. Resource separation and/or directionality must improve the underlying SINR first.
+These results define an **evaluated operating region**, not a universal UAV-capacity limit.
 
-Canonical figures: `fig06_latency_density`, `fig10_harq`.
+## What is new here
 
-## 6. Cross-layer ablation
+The novelty is **not** the generic use of sidelink, topology control, interference analysis, or resource allocation in UAV networks. Prior work has studied each of those areas.
 
-After removing unsupported graph-partition TBS/BLER combinations from the bundled-fixture ablation, the best evaluated fixture-supported mechanism at **N=100** was:
+This project instead provides a controlled, reproducible **NR-aware operating-region characterization** combining:
 
-`adaptive_harq4_directional6_shared`
+- topology-conditioned interference scaling;
+- exact PRB partitioning with recomputed TBS/LDPC/BLER behavior;
+- reliability-goodput trade-offs rather than SINR-only conclusions;
+- resource isolation together with an experimental spatial desired/interferer advantage;
+- matched-seed robustness checks over pairing, allocator, link adaptation, and noise-bandwidth accounting.
 
-with:
+## Paper-specific system model
 
-- mean success probability: **0.0337**
-- modeled goodput: **0.387 Mbps**
-- mean latency: **4.91 ms**
+| Parameter | Value / role |
+|---|---|
+| Carrier | 3.5 GHz |
+| Nominal bandwidth | 50 MHz |
+| SCS | 30 kHz |
+| PRBs | 133 |
+| UAV area | 1000 m x 1000 m |
+| Altitude | 100 m |
+| Tx power | 30 dBm |
+| Noise figure | 7 dB |
+| Swarm sizes | `N={5,10,20,30,50,75,100}` |
+| Resource partitions | `R={1,2,4,8}` |
+| Spatial sensitivity | `G={0,3,6,9} dB` |
+| Main Monte Carlo | 100 deterministic matched seeds |
+| Propagation | published measurement-derived 3.5 GHz A2A large-scale fit |
+| Link evaluation | NR MCS/TBS/LDPC mechanics + sourced 5G-LENA v5.0 link-level BLER data |
 
-For comparison:
+For swarm size `N`, each static snapshot contains `floor(N/2)` simultaneously active one-way disjoint links.
 
-- adaptive MCS shared: **0.116 Mbps**
-- adaptive HARQ4 shared: **0.136 Mbps**
-- adaptive directionality6 shared: **0.316 Mbps**
-- fixed MCS4 shared: **0.088 Mbps**
+## Scientific scope and limitations
 
-This supports the cross-layer conclusion that no single mechanism completely removes the high-density interference problem, while directionality combined with HARQ gives the strongest evaluated improvement in the fixture-supported ablation.
+This is an **NR-aware system-level model**, not a standards-complete NR sidelink implementation.
 
-Canonical figure: `fig12_ablation`.
+The repository does not claim:
 
-## 7. Failure mechanism changes with density
+- measured multi-UAV RF interference, BLER, PDR, or end-to-end latency;
+- a bit-accurate sidelink PHY;
+- normative Mode-1/Mode-2 scheduling or sensing;
+- full fast fading, MIMO, beam tracking, or beam management;
+- measured beamforming gain;
+- a universal maximum supported swarm size.
 
-The failure diagnostic uses an explicit first-transmission success target of 0.5 as an **experimental policy threshold**.
+The weighted conflict-graph allocator and adaptive MCS policy are `THIS_WORK` abstractions. The directional parameter `G` is an experimental desired/interferer sensitivity variable. Expected PHY goodput is not application-layer throughput.
 
-At N=10, failed links were more often classified as dominated by a strongest interferer (**59.8%**) than aggregate interference (**33.6%**).
-
-At N=100, aggregate interference became dominant (**72.16%**) while the dominant-interferer category fell to **27.34%**.
-
-**Interpretation:** as swarm density increases, the interference problem transitions toward a many-interferer aggregate regime, strengthening the motivation for resource coordination and spatial interference suppression.
-
-Canonical figure: `fig15_failures`.
-
-## 8. Multi-hop routing becomes available as topology density increases
-
-Routing is evaluated on an isolated-link graph abstraction with:
-
-- farthest source/destination pair per realization
-- minimum modeled link-success threshold: `0.5`
-- maximum routing hop distance: `350 m`
-- the 350 m limit is an **EXPERIMENTAL_CONFIGURATION**, not a 3GPP range requirement
-
-Observed route connectivity probability:
-
-| UAVs | Route connectivity | Mean min-hop path length |
-|---:|---:|---:|
-| 10 | 0.17 | 4.41 hops |
-| 20 | 0.72 | 4.83 hops |
-| 30 | 0.95 | 4.77 hops |
-| 50 | 1.00 | 4.56 hops |
-| 75 | 1.00 | 4.59 hops |
-| 100 | 1.00 | 4.54 hops |
-
-The routing study is intentionally separated from the simultaneous shared-channel interference experiment. Its route probabilities therefore describe graph/path feasibility under the isolated-link model, not measured or end-to-end swarm PDR.
-
-Canonical figure: `fig08_routing`.
-
-## 9. Real AMOVFLY mobility evidence
-
-The canonical public AMOVFLY pair produced:
-
-- **1831 synchronized telemetry samples**
-- **366.0 s** overlap
-- minimum horizontal separation: **2.06 m**
-- mean horizontal separation: **43.87 m**
-- median horizontal separation: **40.64 m**
-- maximum horizontal separation: **127.75 m**
-- frame: `COMMON_ENU_WGS84_HORIZONTAL_ONLY`
-- distance dimension: `2D_HORIZONTAL`
-
-The UAV trajectories are based on **measured telemetry (`MEASURED_DATASET`)**. Synchronization, coordinate conversion and separation are **derived from the measured dataset**. The canonical mobility analysis deliberately generates **no RF/SINR/BLER/goodput claim** from this pair.
-
-Canonical figure: `fig11_real_mobility`.
-
-## 10. Traffic-load experiment
-
-The explicit Poisson/slotted traffic abstraction shows severe queueing under the evaluated shared-channel conditions. For example, at N=50 the mean delivery ratio decreases from approximately **0.0476 at 50 packets/s/link** to **0.0098 at 1500 packets/s/link**, while utilization approaches one.
-
-These values are `DERIVED_SYSTEM_LEVEL_METRIC` outputs of the experimental traffic/service abstraction. They are not measured application-layer UAV latency/PDR and should be interpreted mainly as evidence of saturation under poor shared-channel reliability.
-
-Canonical figure: `fig17_traffic`.
-
----
-
-# Main research conclusions from the campaign
-
-The evaluated system-level evidence supports four main conclusions:
-
-1. **Density is the dominant stressor in an uncoordinated/shared-resource swarm.** Aggregate co-channel interference causes strong SINR, reliability and goodput degradation as N increases.
-2. **Resource separation is highly effective** because it directly reduces the number of simultaneous co-channel interferers.
-3. **Directionality has the largest compensation potential among the evaluated PHY-side sensitivity mechanisms**, especially when desired gain and interference suppression act together; however, this is a sensitivity study rather than a complete MIMO implementation.
-4. **HARQ and routing are complementary rather than substitutes for interference management.** HARQ cannot rescue links whose first-transmission BLER is already near one, while routing benefits from denser graph connectivity but is evaluated in an isolated-link topology abstraction.
-
-The results therefore motivate a 6G-oriented UAV-swarm design combining **resource coordination + spatial selectivity/directionality + adaptive link control + topology-aware routing**, rather than relying on one mechanism alone.
-
----
-
-## Scientific data policy
-
-Every important quantity is classified as one of:
-
-- `MEASURED` / `MEASURED_DATASET`
-- `STANDARD`
-- `LITERATURE`
-- `LINK_LEVEL_SIMULATION`
-- `DERIVED`
-- `DERIVED_FROM_LINK_LEVEL_SIMULATION`
-- `DERIVED_SYSTEM_LEVEL_METRIC`
-- `EXPERIMENTAL_SWEEP`
-- `EXPERIMENTAL_ASSUMPTION`
-- `EXPERIMENTAL_CONFIGURATION`
-- `SYNTHETIC`
-- `THIS_WORK`
-
-Synthetic simulation values are never presented as real measurements.
-
-## Implemented research layers
-
-### Published measurement-derived A2A propagation
-
-Primary peer-reviewed source: U. Erdemir et al., **“Measurement-based Channel Characterization for A2A and A2G Wireless Drone Communication Systems,”** IEEE VTC 2023-Spring, DOI `10.1109/VTC2023-Spring57618.2023.10199853`.
-
-The repository reproduces the reported A2A large-scale fit at 3.5 GHz using `eta=2.166` and `PL0=34.650 dB`. Values generated from this fit are measurement-derived, not raw RF samples.
-
-### 3GPP Release-19 aerial-to-aerial large-scale channel
-
-A deliberately limited and auditable equal-height UMi-AV A2A implementation is included from 3GPP TR 38.901 V19.4.0 Case 9 and the referenced TR 36.777 aerial-UE large-scale models. This is not a full fast-fading implementation.
-
-### Standards-based MCS, TBS, LDPC and sourced BLER
-
-NR MCS Table 1, TBS and LDPC mechanics are implemented from the recorded 3GPP Release-19 specifications. Numerical SINR-to-BLER curves are sourced from verified 5G-LENA link-level simulation data where available. These curves are not UAV field measurements and are not called 3GPP-standard BLER curves.
-
-### Reproducible research workflow
-
-Install dependencies and run the validation suite:
+## Reproducibility
 
 ```bash
 pip install -r requirements.txt
 python -m pytest -q
+python -m tools.run_thesis_pipeline --dry-run
 ```
 
-The registered research campaign is exercised through the repository's GitHub Actions workflows:
+The topology-first IEEE paper revision passed:
 
-- `.github/workflows/final-campaign.yml` — canonical campaign execution, evidence finalization and scientific audit
-- `.github/workflows/amovfly-public-pair.yml` — public AMOVFLY mobility evidence pipeline
+- figure generation;
+- citation-key integrity;
+- LaTeX compilation;
+- undefined citation/reference checks;
+- exact 5-page limit;
+- overfull-box checks;
+- reviewer-robustness validation;
+- scientific CI.
 
-This keeps the public README focused on the research methodology, reproducible evidence and validated results.
+The verified PDF is committed at [`paper/vtc2027/VTC2027_Spring_UAV_Sidelink.pdf`](paper/vtc2027/VTC2027_Spring_UAV_Sidelink.pdf).
 
-## Canonical evidence locations
+## Evidence provenance
 
-Key generated outputs in a completed full campaign include:
+Two evidence contexts are intentionally kept separate.
 
-- `results/final_campaign/manifest.json`
-- `results/final_campaign/audit_summary.json`
-- `results/final_campaign/scientific_audit.csv`
-- `results/final_campaign/key_findings.md`
-- `results/final_campaign/parameter_provenance.csv`
-- `results/final_campaign/scenario_definitions.csv`
-- `results/final_campaign/*_summary.csv`
-- `figures/final_campaign/fig01...fig17`
+**Paper-specific evidence** supports the topology/resource/spatial-selectivity claims in the manuscript. The 100-seed reviewer-hardening campaign is documented in [`docs/experiments/013_reviewer_robustness.md`](docs/experiments/013_reviewer_robustness.md).
 
-## Important limitations
+**Broader research evidence** contains the larger 18-experiment campaign, including HARQ, routing, mobility, traffic, ULA sensitivity, channel comparisons, and ablations. Its readiness gate is [`docs/FINAL_READINESS.md`](docs/FINAL_READINESS.md).
 
-The repository does **not** claim to implement:
+Do not substitute numerical results between these contexts without checking the exact experiment definition.
 
-- a bit-accurate NR Sidelink PHY;
-- measured swarm RF interference, PDR or end-to-end latency;
-- a normative Mode-1/Mode-2 scheduler;
-- exact standards-complete HARQ IR/CC history processing;
-- full 3GPP fast fading;
-- full MIMO/beam management;
-- a measured RF campaign derived from AMOVFLY telemetry.
+## Repository structure
 
-Where sourced BLER curves are available, reliability is derived from BLER rather than a fixed SINR-success threshold. TBS, LDPC and MCS mechanics can be standards-based while final goodput, latency, fairness, routing and traffic metrics remain derived system-level outputs.
+```text
+paper/                  manuscript, IEEE source, paper audit material
+simulations/            system-level experiments
+results/                generated experiment outputs
+figures/                generated research figures
+references/             bibliography and provenance records
+docs/experiments/       experiment definitions and run evidence
+tools/                  reproducibility and audit tooling
+tests/                  validation tests
+```
 
-## Core references
+## Citation
 
-- U. Erdemir et al., IEEE VTC 2023-Spring, DOI `10.1109/VTC2023-Spring57618.2023.10199853`.
+Until a paper/preprint DOI exists, cite the repository/software artifact using [`CITATION.cff`](CITATION.cff).
+
+After a public preprint DOI is created, this README and `CITATION.cff` should be updated with the permanent DOI and preferred paper citation.
+
+## License
+
+A repository-wide software license has **not yet been declared**. This does not prevent depositing the manuscript as a preprint under a separately selected publication license, but a software license should be chosen before encouraging third-party code reuse.
+
+## Core external evidence
+
+- U. Erdemir et al., *IEEE VTC 2023-Spring*, DOI `10.1109/VTC2023-Spring57618.2023.10199853`.
+- D. Mishra et al., *Computer Communications* 192 (2022), DOI `10.1016/j.comcom.2022.06.001`.
+- W. J. Lau et al., *Computer Networks* 229 (2023), DOI `10.1016/j.comnet.2023.109752`.
+- M. M. Alam and S. Moh, *IEEE Transactions on Mobile Computing* 23(12) (2024), DOI `10.1109/TMC.2024.3403890`.
+- H. Bai et al., *IEEE Wireless Communications Letters* 15 (2026), DOI `10.1109/LWC.2026.3658510`.
 - N. Patriciello et al., *Simulation Modelling Practice and Theory* 96 (2019), DOI `10.1016/j.simpat.2019.101933`.
-- 5G-LENA v5.0 software archive, DOI `10.5281/zenodo.21165297`.
-- 3GPP TR 38.901 V19.4.0 and TR 36.777.
-- 3GPP TS 38.211 / 38.212 / 38.213 / 38.214 and TS 38.104, exact versions recorded in project documentation.
-
-Detailed provenance is maintained under `references/` and experiment notes under `docs/experiments/`.
+- CTTC 5G-LENA v5.0 software archive, DOI `10.5281/zenodo.21165297`.
