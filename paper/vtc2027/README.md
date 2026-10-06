@@ -4,14 +4,14 @@ This directory contains the reproducible IEEE-style conference-paper draft.
 
 ## Paper PDF
 
-The latest CI-verified five-page paper is committed here:
+The currently committed PDF is the last CI-verified five-page build. The topology-first source revision in this branch must be rebuilt by CI before it becomes the new archived submission PDF:
 
 **[VTC2027_Spring_UAV_Sidelink.pdf](VTC2027_Spring_UAV_Sidelink.pdf)**
 
 The PDF is generated from the LaTeX source by GitHub Actions only after citation integrity, undefined-reference, five-page, and overfull-box checks pass.
 
 
-**Interference Scaling, Resource Isolation, and Topology Sensitivity in 5G NR Sidelink UAV Swarms**
+**Topology-Conditioned Interference and Resource-Isolation Trade-offs in 5G NR Sidelink UAV Swarms**
 
 Current author block:
 - Panagiota Grosdouli
